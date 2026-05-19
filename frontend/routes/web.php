@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\KepalaLab\ProcurementController;
@@ -10,19 +11,24 @@ use App\Http\Controllers\StafAdmin\InventoryController;
 use App\Http\Controllers\StafLab\ConsumableController;
 use App\Http\Controllers\StafLab\MaintenanceController;
 
-// ── Public Routes ─────────────────────────────────────────────────────────
+// Public Routes
 Route::get('/',       fn () => redirect()->route('login'));
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ── Administrator ─────────────────────────────────────────────────────────
+// Dashboard (semua role)
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['api.auth'])
+    ->name('dashboard');
+
+// Administrator 
 Route::prefix('admin')->name('admin.')->middleware(['api.auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('rooms', RoomController::class);
 });
 
-// ── Kepala Laboratorium ───────────────────────────────────────────────────
+// Kepala Laboratorium 
 Route::prefix('kepala-lab')->name('kepala-lab.')->middleware(['api.auth', 'role:kepala_lab'])->group(function () {
     Route::get('procurements',                                 [ProcurementController::class, 'index'])->name('procurements.index');
     Route::get('procurements/create',                          [ProcurementController::class, 'create'])->name('procurements.create');
@@ -35,7 +41,7 @@ Route::prefix('kepala-lab')->name('kepala-lab.')->middleware(['api.auth', 'role:
     Route::delete('procurements/{id}/items/{itemId}',          [ProcurementController::class, 'removeItem'])->name('procurements.items.remove');
 });
 
-// ── Ketua Program Studi (Kaprodi) ─────────────────────────────────────────
+// Ketua Program Studi (Kaprodi)
 Route::prefix('kaprodi')->name('kaprodi.')->middleware(['api.auth', 'role:kaprodi'])->group(function () {
     Route::get('procurements',                                    [ProcurementReviewController::class, 'index'])->name('procurements.index');
     Route::get('procurements/{id}',                               [ProcurementReviewController::class, 'show'])->name('procurements.show');
@@ -43,16 +49,16 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['api.auth', 'role:kaprod
     Route::post('procurements/{id}/finalize',                     [ProcurementReviewController::class, 'finalize'])->name('procurements.finalize');
 });
 
-// ── Staf Administrasi ─────────────────────────────────────────────────────
+// Staf Administrasi
 Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:staf_admin'])->group(function () {
     Route::get('procurements',         [InventoryController::class, 'procurements'])->name('procurements.index');
     Route::get('procurements/{id}',    [InventoryController::class, 'procurementDetail'])->name('procurements.show');
-    Route::get('assets',               [InventoryController::class, 'assets'])->name('assets');
+    Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
     Route::patch('assets/{id}/receive',[InventoryController::class, 'setReceived'])->name('assets.receive');
 });
 
-// ── Staf Laboratorium ─────────────────────────────────────────────────────
+// Staf Laboratorium 
 Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf_lab'])->group(function () {
     // BHP
     Route::get('consumables',                    [ConsumableController::class, 'index'])->name('consumables.index');

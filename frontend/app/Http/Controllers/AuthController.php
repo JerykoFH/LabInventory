@@ -50,17 +50,10 @@ class AuthController extends Controller
     }
 
     /**
-     * Redirect ke dashboard sesuai role
+     * Redirect ke dashboard setelah login
      */
     private function redirectByRole(string $role)
     {
-        return match ($role) {
-            'admin'      => redirect()->route('admin.users.index'),
-            'kepala_lab' => redirect()->route('kepala-lab.procurements.index'),
-            'kaprodi'    => redirect()->route('kaprodi.procurements.index'),
-            'staf_admin' => redirect()->route('staf-admin.procurements.index'),
-            'staf_lab'   => redirect()->route('staf-lab.consumables.index'),
-            default      => redirect('/'),
-        };
+        return redirect()->route('dashboard');
     }
 }
