@@ -95,6 +95,30 @@ const submitDraft = async (req, res) => {
     }
 };
 
+/**
+ * DELETE /api/kepala-lab/procurements/:id
+ * Hapus draf pengadaan yang masih berstatus draft
+ */
+const deleteDraft = async (req, res) => {
+    try {
+        const draft = await ProcurementDraft.findOne({ _id: req.params.id, createdBy: req.user._id });
+        if (!draft) return res.status(404).json({ success: false, message: 'Draft not found' });
+        
+        // Hanya draf yang belum disubmit yang bisa dihapus
+        if (draft.status !== 'draft') {
+            return res.status(400).json({ success: false, message: 'Only unsubmitted drafts can be deleted' });
+        }
+
+        // Hapus item-item di dalamnya juga
+        await ProcurementItem.deleteMany({ draft: draft._id });
+        await draft.deleteOne();
+        
+        res.json({ success: true, message: 'Draft successfully deleted' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // ── Procurement Items ────────────────────────────────────────────────────────
 
 /**
@@ -159,4 +183,14 @@ const deleteItem = async (req, res) => {
     }
 };
 
-module.exports = { getMyDrafts, createDraft, getDraftById, updateDraft, submitDraft, addItem, updateItem, deleteItem };
+module.exports = {
+    getMyDrafts,
+    createDraft,
+    getDraftById,
+    updateDraft,
+    submitDraft,
+    deleteDraft,
+    addItem,
+    updateItem,
+    deleteItem,
+};

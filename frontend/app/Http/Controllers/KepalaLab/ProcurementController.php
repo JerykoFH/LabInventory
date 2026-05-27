@@ -95,6 +95,19 @@ class ProcurementController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
+    /** DELETE /kepala-lab/procurements/{id} */
+    public function destroy(string $id)
+    {
+        $response = $this->api->delete("/api/kepala-lab/procurements/{$id}");
+
+        if ($response->successful()) {
+            return redirect()->route('kepala-lab.procurements.index')
+                ->with('success', 'Draf berhasil dihapus.');
+        }
+
+        return back()->withErrors($response->json('message'));
+    }
+
     /** POST /kepala-lab/procurements/{id}/submit */
     public function submit(string $id)
     {
