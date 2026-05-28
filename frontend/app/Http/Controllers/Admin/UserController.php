@@ -75,8 +75,10 @@ class UserController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email',
             'role'     => 'required|in:admin,kepala_lab,kaprodi,staf_admin,staf_lab',
-            'isActive' => 'boolean',
+            'isActive' => 'required',
         ]);
+
+        $validated['isActive'] = (bool) $validated['isActive'];
 
         $response = $this->api->put("/api/admin/users/{$id}", $validated);
 

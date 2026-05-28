@@ -24,32 +24,21 @@ class DashboardController extends Controller
             'maintenanceNeeded' => 0,
         ];
 
-        // Ambil data statistik sesuai role user
-        // Pakai try-catch biar dashboard tetap kebuka walaupun API lagi error
         try {
-            $role = $user['role'] ?? '';
-
-            if ($role === 'admin') {
-                $usersResp = $this->api->get('/api/admin/users');
-                if ($usersResp->successful()) {
-                    $stats['totalUsers'] = count($usersResp->json('data') ?? []);
-                }
-                $roomsResp = $this->api->get('/api/admin/rooms');
-                if ($roomsResp->successful()) {
-                    $stats['totalRooms'] = count($roomsResp->json('data') ?? []);
-                }
+            $response = $this->api->get('/api/dashboard/stats');
+            
+            if ($response->successful()) {
+                $data = $response->json('data') ?? [];
+                
+                $stats['totalAssets'] = $data['totalAssets'] ?? 0;
+                $stats['totalConsumables'] = $data['totalConsumables'] ?? 0;
+                $stats['lowStockConsumables'] = $data['lowStockConsumables'] ?? 0;
+                $stats['totalRooms'] = $data['totalRooms'] ?? 0;
+                $stats['totalDrafts'] = $data['totalDrafts'] ?? 0;
+                $stats['submittedDrafts'] = $data['submittedDrafts'] ?? 0;
+                $stats['totalUsers'] = $data['totalUsers'] ?? 0;
+                $stats['maintenanceNeeded'] = $data['maintenanceNeeded'] ?? 0;
             }
-
-            if (in_array($role, ['kepala_lab', 'kaprodi'])) {
-                $prefix = $role === 'kepala_lab' ? '/api/kepala-lab' : '/api/kaprodi';
-                $draftsResp = $this->api->get("$prefix/procurements");
-                if ($draftsResp->successful()) {
-                    $drafts = $draftsResp->json('data') ?? [];
-                    $stats['totalDrafts'] = count($drafts);
-                    $stats['submittedDrafts'] = count(array_filter($drafts, fn($d) => ($d['status'] ?? '') === 'submitted'));
-                }
-            }
-
         } catch (\Exception $e) {
             // Dashboard tetap tampil walaupun API gagal
         }
