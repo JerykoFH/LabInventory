@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-/**
- * StafLab\ConsumableController
- * Mengelola stok BHP (Barang Habis Pakai)
- */
+// Controller staf lab — kelola stok barang habis pakai (BHP)
 class ConsumableController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    /** GET /staf-lab/consumables */
+    // Tampilkan semua item BHP beserta stok saat ini
     public function index()
     {
         $response = $this->api->get('/api/staf-lab/consumables');
@@ -23,13 +20,13 @@ class ConsumableController extends Controller
         return view('staf_lab.consumables.index', compact('items'));
     }
 
-    /** GET /staf-lab/consumables/create */
+    // Tampilkan form tambah item BHP
     public function create()
     {
         return view('staf_lab.consumables.create');
     }
 
-    /** POST /staf-lab/consumables */
+    // Simpan item BHP baru ke database
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -52,7 +49,7 @@ class ConsumableController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
-    /** PATCH /staf-lab/consumables/{id}/stock — Adjust stok */
+    // Tambah atau kurangi stok BHP (adjustment positif = tambah, negatif = kurangi)
     public function adjustStock(Request $request, string $id)
     {
         $validated = $request->validate([
