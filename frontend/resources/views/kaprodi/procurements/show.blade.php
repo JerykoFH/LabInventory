@@ -222,13 +222,14 @@
                                                                         
                                                                         <div id="reason_container_{{ $item['_id'] }}" class="mt-3 d-none">
                                                                             <div class="input-group input-group-dynamic">
-                                                                                <textarea name="rejectionReason" class="form-control" rows="3" placeholder="Alasan Penolakan (Wajib jika ditolak)"></textarea>
+                                                                                <textarea name="rejectionReason" id="reason_{{ $item['_id'] }}" class="form-control" rows="3" placeholder="Alasan Penolakan (Wajib jika ditolak)"></textarea>
                                                                             </div>
+                                                                            <small id="reason_error_{{ $item['_id'] }}" class="text-danger d-none">Alasan penolakan wajib diisi.</small>
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                        <button type="submit" class="btn bg-gradient-primary">Simpan Keputusan</button>
+                                                                        <button type="submit" class="btn bg-gradient-primary" id="submitBtn_{{ $item['_id'] }}">Simpan Keputusan</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -284,19 +285,51 @@
             const msgApproved = document.getElementById('msg_approved_' + itemId);
             const msgRejected = document.getElementById('msg_rejected_' + itemId);
             const reasonContainer = document.getElementById('reason_container_' + itemId);
+            const reasonInput = document.getElementById('reason_' + itemId);
+            const reasonError = document.getElementById('reason_error_' + itemId);
             
             statusInput.value = status;
+            
+            // Reset error state
+            reasonError.classList.add('d-none');
+            reasonInput.classList.remove('is-invalid');
             
             if (status === 'approved') {
                 msgApproved.classList.remove('d-none');
                 msgRejected.classList.add('d-none');
                 reasonContainer.classList.add('d-none');
+                reasonInput.removeAttribute('required');
             } else {
                 msgApproved.classList.add('d-none');
                 msgRejected.classList.remove('d-none');
                 reasonContainer.classList.remove('d-none');
+                reasonInput.setAttribute('required', 'required');
             }
         }
+
+        // Validasi form sebelum submit — alasan wajib diisi kalau menolak
+        document.querySelectorAll('form[action*="/review"]').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                const statusInput = form.querySelector('input[name="approvalStatus"]');
+                if (statusInput && statusInput.value === 'rejected') {
+                    const reasonInput = form.querySelector('textarea[name="rejectionReason"]');
+                    const reasonError = reasonInput ? reasonInput.closest('.mt-3').querySelector('small') : null;
+
+                    if (!reasonInput || !reasonInput.value.trim()) {
+                        e.preventDefault();
+                        if (reasonInput) {
+                            reasonInput.classList.add('is-invalid');
+                            reasonInput.style.borderColor = '#f44335';
+                        }
+                        if (reasonError) {
+                            reasonError.classList.remove('d-none');
+                        }
+                        return false;
+                    }
+                }
+            });
+        });
     </script>
     @endpush
 </x-layout>
+

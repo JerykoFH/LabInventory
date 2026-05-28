@@ -57,6 +57,10 @@ const reviewItem = async (req, res) => {
             return res.status(400).json({ success: false, message: 'approvalStatus must be approved or rejected' });
         }
 
+        if (approvalStatus === 'rejected' && (!rejectionReason || rejectionReason.trim() === '')) {
+            return res.status(400).json({ success: false, message: 'Rejection reason is required when rejecting an item' });
+        }
+
         const item = await ProcurementItem.findOneAndUpdate(
             { _id: req.params.itemId, draft: draft._id },
             { approvalStatus, rejectionReason: approvalStatus === 'rejected' ? rejectionReason : undefined },
