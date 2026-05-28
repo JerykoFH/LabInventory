@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 
-/**
- * Consumable Item (BHP - Barang Habis Pakai) Schema
- * Stok dikelola oleh Staf Laboratorium
- */
+// Barang yang bisa habis (consumed)
 const consumableItemSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -15,7 +12,7 @@ const consumableItemSchema = new mongoose.Schema({
         trim: true,
     },
     unit: {
-        type: String,   // satuan: botol, pack, liter, gram, dll.
+        type: String,   
         required: true,
         trim: true,
     },
@@ -27,7 +24,7 @@ const consumableItemSchema = new mongoose.Schema({
     },
     minimumStock: {
         type: Number,
-        default: 5,     // batas minimum untuk alert
+        default: 5,     
     },
     location: {
         type: String,

@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
-/**
- * ProcurementItem — item individual dalam sebuah draf pengadaan
- */
+// Tiap baris item yang ada dalam sebuah draf pengadaan
 const procurementItemSchema = new mongoose.Schema({
     draft: {
         type: mongoose.Schema.Types.ObjectId,
@@ -37,12 +35,12 @@ const procurementItemSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    // Aset yang akan digantikan (opsional, hanya untuk itemType='asset')
+    // Aset lama yang mau diganti (opsional, khusus itemType='asset')
     replacedAsset: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Asset',
     },
-    // Status persetujuan oleh Kaprodi
+    // Hasil review Kaprodi: pending, approved, atau rejected
     approvalStatus: {
         type: String,
         enum: ['pending', 'approved', 'rejected'],

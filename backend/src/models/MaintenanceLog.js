@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 
-/**
- * MaintenanceLog — log pemeliharaan aset inventaris
- * Diisi oleh Staf Laboratorium
- */
+// Catatan setiap kali ada pemeliharaan aset, diisi oleh Staf Lab
 const maintenanceLogSchema = new mongoose.Schema({
     asset: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,7 +35,7 @@ const maintenanceLogSchema = new mongoose.Schema({
         type: String,
         enum: ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif'],
     },
-    // BHP yang digunakan selama maintenance
+    // BHP yang terpakai waktu maintenance berlangsung
     consumablesUsed: [
         {
             item: {

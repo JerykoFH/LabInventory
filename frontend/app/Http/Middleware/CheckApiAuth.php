@@ -7,12 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * CheckApiAuth
- * Middleware ini buat ngecek user udah login atau belum.
- * Login dianggap valid kalau api_token dan api_user ada di session.
- * Kalau belum login, user bakal dilempar balik ke halaman login.
- */
+// Middleware ini ngecek apakah user sudah login lewat session
+// Kalau belum ada token atau data user di session, langsung redirect ke login
 class CheckApiAuth
 {
     public function handle(Request $request, Closure $next): Response
@@ -22,14 +18,13 @@ class CheckApiAuth
                 ->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Sediakan data user ke semua view via View::share
+        // Bagikan data user ke semua view biar bisa langsung pakai $authUser
         $user = Session::get('api_user');
         view()->share('authUser', $user);
 
         $response = $next($request);
 
-        // Cegah browser men-cache halaman protected (mencegah Back button
-        // menampilkan halaman login dari browser cache / bfcache)
+        // Pasang header no-cache biar back button di browser nggak bypass ke halaman yang sudah logout
         return $response->withHeaders([
             'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
             'Pragma'        => 'no-cache',

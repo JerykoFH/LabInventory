@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 
-/**
- * Room Schema
- * Dikelola oleh Administrator
- */
+// Data ruangan yang ada di kampus, dikelola sama Admin
 const roomSchema = new mongoose.Schema({
     name: {
         type: String,

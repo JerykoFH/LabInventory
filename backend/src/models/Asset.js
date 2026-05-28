@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 
-/**
- * Asset (Inventaris) Schema
- * Contoh: komputer, proyektor, meja lab, dll.
- */
+// Data inventaris fisik — komputer, proyektor, meja lab, dan sejenisnya
 const assetSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -13,7 +10,7 @@ const assetSchema = new mongoose.Schema({
     assetCode: {
         type: String,
         unique: true,
-        sparse: true,   // bisa null sebelum diberi label oleh staf admin
+        sparse: true,   // boleh kosong dulu sebelum staf admin kasih label
         trim: true,
     },
     category: {
@@ -42,20 +39,20 @@ const assetSchema = new mongoose.Schema({
         default: 0,
     },
     labelPhoto: {
-        type: String,   // path/URL foto QR/Barcode
+        type: String,   // path atau URL foto label/QR
     },
     qrCode: {
-        type: String,   // kode QR/barcode string
+        type: String,   // string kode QR atau barcode
     },
     receivedDate: {
-        type: Date,     // tanggal penerimaan barang (diisi staf admin)
+        type: Date,     // kapan barangnya sampai, diisi staf admin
     },
-    // Referensi ke item pengadaan asal (opsional)
+    // Dari item pengadaan mana aset ini berasal (kalau ada)
     procurementItem: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ProcurementItem',
     },
-    // Aset yang digantikan oleh aset ini
+    // Aset lama yang digantikan oleh aset ini
     replacedAsset: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Asset',

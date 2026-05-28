@@ -6,16 +6,12 @@ use App\Services\ApiClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
-/**
- * AuthController
- * Menangani login/logout Laravel session-based.
- * Token JWT disimpan di session dan diteruskan ke Node.js backend via ApiClient.
- */
+// Semua request ke Node.js backend dikirim lewat ApiClient yang inject via constructor
 class AuthController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    /** GET /login */
+    // Tampilkan halaman login, redirect langsung kalau sudah login
     public function showLogin()
     {
         if (Session::has('api_user')) {
@@ -32,7 +28,7 @@ class AuthController extends Controller
             ]);
     }
 
-    /** POST /login */
+    // Proses form login — validasi input lalu kirim ke Node.js
     public function login(Request $request)
     {
         $request->validate([
@@ -49,16 +45,14 @@ class AuthController extends Controller
         return $this->redirectByRole($user['role']);
     }
 
-    /** POST /logout */
+    // Hapus session dan arahkan kembali ke halaman login
     public function logout()
     {
         $this->api->logout();
         return redirect()->route('login')->with('success', 'Anda berhasil logout.');
     }
 
-    /**
-     * Redirect ke halaman utama sesuai role setelah login
-     */
+    // Tentukan ke halaman mana user diarahkan setelah login, berdasarkan rolenya
     private function redirectByRole(string $role)
     {
         return match($role) {

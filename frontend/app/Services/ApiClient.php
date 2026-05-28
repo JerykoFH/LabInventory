@@ -5,11 +5,8 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 
-/**
- * ApiClient — Service untuk berkomunikasi dengan Node.js backend
- *
- * Setiap method otomatis menyertakan Bearer token dari session.
- */
+// Service untuk ngobrol sama Node.js backend
+// Token dari session otomatis ikut setiap request
 class ApiClient
 {
     protected string $baseUrl;
@@ -21,9 +18,7 @@ class ApiClient
         $this->internalKey = env('INTERNAL_API_KEY', '');
     }
 
-    /**
-     * Buat HTTP request dengan auth token dari session
-     */
+    // Siapkan HTTP client dengan token dari session
     private function http()
     {
         $token = Session::get('api_token');
@@ -60,9 +55,7 @@ class ApiClient
         return $this->http()->delete($endpoint);
     }
 
-    /**
-     * Login ke API dan simpan token ke session
-     */
+    // Login ke API — simpan token dan data user ke session Laravel
     public function login(string $email, string $password)
     {
         $response = Http::baseUrl($this->baseUrl)
@@ -78,9 +71,7 @@ class ApiClient
         return null;
     }
 
-    /**
-     * Logout — hapus token dari session
-     */
+    // Logout — buang token dan user dari session
     public function logout(): void
     {
         Session::forget(['api_token', 'api_user']);

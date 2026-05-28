@@ -7,12 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * RoleMiddleware
- * Middleware ini buat ngecek apakah role user boleh akses halaman tertentu.
- * Contoh pakainya di route:
- * middleware('role:admin') atau middleware('role:admin,kepala_lab')
- */
+// Middleware ini ngecek apakah role user boleh masuk ke halaman tertentu
+// Cara pakai di route: middleware('role:admin') atau middleware('role:admin,kepala_lab')
 class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response

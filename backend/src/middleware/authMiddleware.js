@@ -1,15 +1,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-/**
- * protect = ngecek JWT token dari header Authorization
- * kalau token valid, data user bakal disimpan ke req.user
- */
+// Cek JWT token dari header Authorization, kalau valid simpan user ke req.user
 const protect = async (req, res, next) => {
     try {
         let token;
 
-        // Ambil token dari header Authorization: Bearer <token>
+        // Ambil token dari Authorization: Bearer <token>
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
@@ -21,10 +18,10 @@ const protect = async (req, res, next) => {
             });
         }
 
-        // Cek tokennya valid atau tidak
+        // Verifikasi token ke JWT_SECRET
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Cari user dari id yang ada di token, password tidak ikut diambil
+        // Cari usernya di DB pakai ID dari token, password jangan ikut
         const user = await User.findById(decoded.id).select('-password');
 
         if (!user) {
@@ -41,11 +38,11 @@ const protect = async (req, res, next) => {
             });
         }
 
-        // Simpan data user ke request biar bisa dipakai di controller berikutnya
+        // Tempel data user ke request biar controller bisa pakai
         req.user = user;
         next();
     } catch (error) {
-        // Kalau token bermasalah, error-nya ditangani di sini
+        // Tangkap error JWT yang mungkin muncul
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({
                 success: false,
@@ -66,11 +63,8 @@ const protect = async (req, res, next) => {
     }
 };
 
-/**
- * authorize = ngecek apakah role user boleh akses route ini atau tidak
- * dipakai setelah protect, contoh: authorize('admin', 'kepala_lab')
- * roles = daftar role yang boleh akses
- */
+// Cek apakah role user termasuk yang boleh akses route ini
+// Pakai setelah protect, contoh: authorize('admin', 'kepala_lab')
 const authorize = (...roles) => {
     return (req, res, next) => {
         if (!req.user) {

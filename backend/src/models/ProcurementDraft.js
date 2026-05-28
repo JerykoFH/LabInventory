@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
 
-/**
- * ProcurementDraft — draf pengadaan tahunan dari Kepala Laboratorium
- * Status flow: draft → submitted → locked (setelah kaprodi finalisasi)
- */
+// Draf pengadaan tahunan yang dibuat Kepala Lab
+// Status berjalan: draft → submitted → locked
 const procurementDraftSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -21,7 +19,7 @@ const procurementDraftSchema = new mongoose.Schema({
     },
     reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',   // kaprodi yang mereview
+        ref: 'User',   // siapa kaprodinya yang review
     },
     status: {
         type: String,
