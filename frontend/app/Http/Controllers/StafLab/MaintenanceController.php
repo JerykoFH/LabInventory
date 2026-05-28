@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-/**
- * StafLab\MaintenanceController
- * Log pemeliharaan aset + update kondisi + pemakaian BHP
- */
+// Controller staf lab — catat dan lihat log pemeliharaan aset
 class MaintenanceController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    /** GET /staf-lab/maintenance */
+    // Tampilkan semua log pemeliharaan, terbaru di atas
     public function index()
     {
         $response = $this->api->get('/api/staf-lab/maintenance');
@@ -23,10 +20,10 @@ class MaintenanceController extends Controller
         return view('staf_lab.maintenance.index', compact('logs'));
     }
 
-    /** GET /staf-lab/maintenance/create */
+    // Tampilkan form catat pemeliharaan (muat daftar aset & BHP untuk pilihan form)
     public function create()
     {
-        // Ambil daftar aset dan BHP untuk form
+        // Ambil daftar aset dan BHP untuk opsi form
         $assetsResp = $this->api->get('/api/staf-admin/assets');
         $assets = $assetsResp->successful() ? $assetsResp->json('data') : [];
 
@@ -36,7 +33,7 @@ class MaintenanceController extends Controller
         return view('staf_lab.maintenance.create', compact('assets', 'consumables'));
     }
 
-    /** POST /staf-lab/maintenance */
+    // Simpan log baru, kurangi stok BHP yang digunakan, dan update kondisi aset
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -62,7 +59,7 @@ class MaintenanceController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
-    /** GET /staf-lab/maintenance/{id} */
+    // Tampilkan detail satu log pemeliharaan
     public function show(string $id)
     {
         $response = $this->api->get("/api/staf-lab/maintenance/{$id}");

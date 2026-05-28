@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-/**
- * StafAdmin\InventoryController
- * Mengelola inventaris: label, QR/barcode, dan tanggal penerimaan barang
- */
+// Controller untuk staf administrasi — kelola label aset & penerimaan barang
 class InventoryController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    /** GET /staf-admin/procurements — Lihat draf locked */
+    // Tampilkan daftar pengadaan yang sudah final (status locked)
     public function procurements()
     {
         $response = $this->api->get('/api/staf-admin/procurements');
@@ -23,7 +20,7 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.index', compact('drafts'));
     }
 
-    /** GET /staf-admin/procurements/{id} — Detail draf locked */
+    // Tampilkan detail satu pengadaan beserta item yang disetujui
     public function procurementDetail(string $id)
     {
         $response = $this->api->get("/api/staf-admin/procurements/{$id}");
@@ -32,7 +29,7 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.show', compact('draft'));
     }
 
-    /** GET /staf-admin/assets — Daftar inventaris */
+    // Tampilkan semua aset inventaris laboratorium
     public function assets()
     {
         $response = $this->api->get('/api/staf-admin/assets');
@@ -41,7 +38,7 @@ class InventoryController extends Controller
         return view('staf_admin.assets.index', compact('assets'));
     }
 
-    /** PATCH /staf-admin/assets/{id}/label — Update label/QR */
+    // Simpan kode aset / label / QR yang diinput staf
     public function updateLabel(Request $request, string $id)
     {
         $validated = $request->validate([
@@ -53,13 +50,13 @@ class InventoryController extends Controller
         $response = $this->api->patch("/api/staf-admin/assets/{$id}/label", $validated);
 
         if ($response->successful()) {
-            return redirect()->route('staf-admin.assets')->with('success', 'Label aset berhasil diperbarui.');
+            return redirect()->route('staf-admin.assets.index')->with('success', 'Label aset berhasil diperbarui.');
         }
 
         return back()->withErrors($response->json('message'));
     }
 
-    /** PATCH /staf-admin/assets/{id}/receive — Input tanggal penerimaan */
+    // Simpan tanggal barang diterima secara fisik
     public function setReceived(Request $request, string $id)
     {
         $validated = $request->validate([
@@ -69,7 +66,7 @@ class InventoryController extends Controller
         $response = $this->api->patch("/api/staf-admin/assets/{$id}/receive", $validated);
 
         if ($response->successful()) {
-            return redirect()->route('staf-admin.assets')->with('success', 'Tanggal penerimaan berhasil disimpan.');
+            return redirect()->route('staf-admin.assets.index')->with('success', 'Tanggal penerimaan berhasil disimpan.');
         }
 
         return back()->withErrors($response->json('message'));
