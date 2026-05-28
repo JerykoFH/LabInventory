@@ -22,7 +22,14 @@ class AuthController extends Controller
             return $this->redirectByRole(Session::get('api_user')['role']);
         }
 
-        return view('auth.login');
+        // Pastikan halaman login tidak di-cache browser
+        return response()
+            ->view('auth.login')
+            ->withHeaders([
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+                'Pragma'        => 'no-cache',
+                'Expires'       => '0',
+            ]);
     }
 
     /** POST /login */
@@ -50,10 +57,17 @@ class AuthController extends Controller
     }
 
     /**
-     * Redirect ke dashboard setelah login
+     * Redirect ke halaman utama sesuai role setelah login
      */
     private function redirectByRole(string $role)
     {
-        return redirect()->route('dashboard');
+        return match($role) {
+            'admin'      => redirect()->route('admin.users.index'),
+            'kepala_lab' => redirect()->route('kepala-lab.procurements.index'),
+            'kaprodi'    => redirect()->route('kaprodi.procurements.index'),
+            'staf_admin' => redirect()->route('staf-admin.procurements.index'),
+            'staf_lab'   => redirect()->route('staf-lab.consumables.index'),
+            default      => redirect()->route('dashboard'),
+        };
     }
 }

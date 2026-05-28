@@ -26,6 +26,14 @@ class CheckApiAuth
         $user = Session::get('api_user');
         view()->share('authUser', $user);
 
-        return $next($request);
+        $response = $next($request);
+
+        // Cegah browser men-cache halaman protected (mencegah Back button
+        // menampilkan halaman login dari browser cache / bfcache)
+        return $response->withHeaders([
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+        ]);
     }
 }
