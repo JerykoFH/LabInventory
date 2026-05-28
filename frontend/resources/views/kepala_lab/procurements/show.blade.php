@@ -278,6 +278,11 @@
                                             </td>
                                             @if($isDraft)
                                             <td class="align-middle">
+                                                <button type="button" class="btn btn-link text-info text-xs p-0 mb-0 me-2"
+                                                    data-bs-toggle="modal" data-bs-target="#editItemModal-{{ $loop->index }}"
+                                                    title="Edit item">
+                                                    <i class="material-icons text-sm">edit</i>
+                                                </button>
                                                 <form action="{{ route('kepala-lab.procurements.items.remove', [$draft['_id'], $item['_id']]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus item ini?')">
                                                     @csrf
                                                     @method('DELETE')
@@ -309,6 +314,101 @@
                 </a>
             </div>
 
+            {{-- Edit Item Modals --}}
+            @if($isDraft)
+            @foreach($draft['items'] ?? [] as $item)
+            <div class="modal fade" id="editItemModal-{{ $loop->index }}" tabindex="-1" aria-labelledby="editItemLabel-{{ $loop->index }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="{{ route('kepala-lab.procurements.items.update', [$draft['_id'], $item['_id']]) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="modal-header bg-gradient-primary">
+                                <h6 class="modal-title text-white" id="editItemLabel-{{ $loop->index }}">
+                                    <i class="material-icons text-sm me-1">edit</i> Edit Item: {{ $item['name'] }}
+                                </h6>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-static my-3">
+                                            <label class="ms-0">Tipe Item</label>
+                                            <select name="itemType" class="form-control" required>
+                                                <option value="asset" {{ $item['itemType'] === 'asset' ? 'selected' : '' }}>Aset (Inventaris)</option>
+                                                <option value="consumable" {{ $item['itemType'] === 'consumable' ? 'selected' : '' }}>BHP (Barang Habis Pakai)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-outline my-3 is-filled">
+                                            <label class="form-label">Nama Barang</label>
+                                            <input type="text" name="name" class="form-control" value="{{ $item['name'] }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group input-group-outline my-3 is-filled">
+                                            <label class="form-label">Jumlah</label>
+                                            <input type="number" name="quantity" class="form-control" value="{{ $item['quantity'] }}" min="1" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group input-group-outline my-3 {{ ($item['unit'] ?? '') ? 'is-filled' : '' }}">
+                                            <label class="form-label">Satuan</label>
+                                            <input type="text" name="unit" class="form-control" value="{{ $item['unit'] ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-outline my-3 is-filled">
+                                            <label class="form-label">Estimasi Harga (Rp)</label>
+                                            <input type="number" name="estimatedPrice" class="form-control" value="{{ $item['estimatedPrice'] }}" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-outline my-3 {{ ($item['purchaseLink'] ?? '') ? 'is-filled' : '' }}">
+                                            <label class="form-label">Link Pembelian (URL)</label>
+                                            <input type="url" name="purchaseLink" class="form-control" value="{{ $item['purchaseLink'] ?? '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group input-group-static my-3">
+                                            <label class="ms-0">Menggantikan Aset (opsional)</label>
+                                            <select name="replacedAsset" class="form-control">
+                                                <option value="">-- Tidak ada --</option>
+                                                @foreach($assets as $asset)
+                                                    @php
+                                                        $replacedId = '';
+                                                        if (isset($item['replacedAsset'])) {
+                                                            $replacedId = is_array($item['replacedAsset']) ? ($item['replacedAsset']['_id'] ?? '') : $item['replacedAsset'];
+                                                        }
+                                                    @endphp
+                                                    <option value="{{ $asset['_id'] }}" {{ $replacedId == $asset['_id'] ? 'selected' : '' }}>
+                                                        {{ $asset['name'] }} {{ $asset['assetCode'] ? '(' . $asset['assetCode'] . ')' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="input-group input-group-dynamic my-3">
+                                            <textarea name="notes" class="form-control" rows="2" placeholder="Catatan (opsional)">{{ $item['notes'] ?? '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn bg-gradient-primary">
+                                    <i class="material-icons text-sm me-1">save</i> Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+            @endif
+
             @else
             <div class="row">
                 <div class="col-12">
@@ -326,3 +426,4 @@
         </div>
     </main>
 </x-layout>
+

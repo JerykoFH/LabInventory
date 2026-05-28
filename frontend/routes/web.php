@@ -39,6 +39,7 @@ Route::prefix('kepala-lab')->name('kepala-lab.')->middleware(['api.auth', 'role:
     Route::delete('procurements/{id}',                         [ProcurementController::class, 'destroy'])->name('procurements.destroy');
     Route::post('procurements/{id}/submit',                    [ProcurementController::class, 'submit'])->name('procurements.submit');
     Route::post('procurements/{id}/items',                     [ProcurementController::class, 'addItem'])->name('procurements.items.add');
+    Route::put('procurements/{id}/items/{itemId}',             [ProcurementController::class, 'updateItem'])->name('procurements.items.update');
     Route::delete('procurements/{id}/items/{itemId}',          [ProcurementController::class, 'removeItem'])->name('procurements.items.remove');
 });
 

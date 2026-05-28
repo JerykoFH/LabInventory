@@ -147,6 +147,30 @@ class ProcurementController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
+    /** PUT /kepala-lab/procurements/{id}/items/{itemId} */
+    public function updateItem(Request $request, string $id, string $itemId)
+    {
+        $validated = $request->validate([
+            'itemType'       => 'required|in:asset,consumable',
+            'name'           => 'required|string|max:200',
+            'quantity'       => 'required|integer|min:1',
+            'unit'           => 'nullable|string|max:50',
+            'estimatedPrice' => 'required|numeric|min:0',
+            'purchaseLink'   => 'nullable|url',
+            'replacedAsset'  => 'nullable|string',
+            'notes'          => 'nullable|string',
+        ]);
+
+        $response = $this->api->put("/api/kepala-lab/procurements/{$id}/items/{$itemId}", $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('kepala-lab.procurements.show', $id)
+                ->with('success', 'Item berhasil diperbarui.');
+        }
+
+        return back()->withErrors($response->json('message'))->withInput();
+    }
+
     /** DELETE /kepala-lab/procurements/{id}/items/{itemId} */
     public function removeItem(string $id, string $itemId)
     {
