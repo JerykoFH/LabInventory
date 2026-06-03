@@ -5,6 +5,7 @@ const {
     getMyDrafts, createDraft, getDraftById, updateDraft, submitDraft, deleteDraft,
     addItem, updateItem, deleteItem,
 } = require('../controllers/procurementController');
+const { getAllAssets } = require('../controllers/inventoryController');
 
 router.use(protect, authorize('kepala_lab'));
 
@@ -20,5 +21,8 @@ router.post('/procurements/:id/submit', submitDraft);
 router.post('/procurements/:id/items', addItem);
 router.put('/procurements/:id/items/:itemId', updateItem);
 router.delete('/procurements/:id/items/:itemId', deleteItem);
+
+// Assets
+router.get('/assets', getAllAssets);
 
 module.exports = router;

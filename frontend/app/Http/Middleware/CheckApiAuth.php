@@ -25,10 +25,19 @@ class CheckApiAuth
         $response = $next($request);
 
         // Pasang header no-cache biar back button di browser nggak bypass ke halaman yang sudah logout
-        return $response->withHeaders([
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
-            'Pragma'        => 'no-cache',
-            'Expires'       => '0',
-        ]);
+        if (method_exists($response, 'withHeaders')) {
+            return $response->withHeaders([
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+                'Pragma'        => 'no-cache',
+                'Expires'       => '0',
+            ]);
+        }
+
+        // Jika response adalah tipe lain (seperti BinaryFileResponse untuk download Excel/PDF)
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 }
