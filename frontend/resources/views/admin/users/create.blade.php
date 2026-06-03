@@ -40,7 +40,14 @@
 
                                 <div class="input-group input-group-outline my-3 {{ old('password') ? 'is-filled' : '' }}">
                                     <label class="form-label">Password (min 8 karakter)</label>
-                                    <input type="password" name="password" class="form-control" minlength="8" required>
+                                    <input type="password" name="password" id="password" class="form-control" minlength="8" required>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mb-0 toggle-password" data-target="password" style="margin-left: 10px;">Lihat</button>
+                                </div>
+
+                                <div class="input-group input-group-outline my-3 {{ old('password_confirmation') ? 'is-filled' : '' }}">
+                                    <label class="form-label">Konfirmasi Password</label>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" minlength="8" required>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mb-0 toggle-password" data-target="password_confirmation" style="margin-left: 10px;">Lihat</button>
                                 </div>
 
                                 <div class="input-group input-group-static my-3">
@@ -75,4 +82,23 @@
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
+
+    @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-password').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const target = document.getElementById(this.dataset.target);
+                    if (target.type === 'password') {
+                        target.type = 'text';
+                        this.textContent = 'Sembunyikan';
+                    } else {
+                        target.type = 'password';
+                        this.textContent = 'Lihat';
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layout>
