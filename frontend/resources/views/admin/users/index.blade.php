@@ -77,13 +77,15 @@
                                                 <a href="{{ route('admin.users.edit', $user['_id']) }}" class="text-warning font-weight-bold text-xs me-2" title="Edit">
                                                     <i class="material-icons text-sm">edit</i>
                                                 </a>
-                                                <form action="{{ route('admin.users.destroy', $user['_id']) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menonaktifkan user ini?')">
+                                                @if(isset($authUser) && (isset($authUser['id']) ? $authUser['id'] : $authUser['_id'] ?? '') !== $user['_id'])
+                                                <form action="{{ route('admin.users.destroy', $user['_id']) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin memproses user ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-link text-danger text-xs p-0 mb-0" title="Nonaktifkan">
+                                                    <button type="submit" class="btn btn-link text-danger text-xs p-0 mb-0" title="Hapus/Nonaktifkan">
                                                         <i class="material-icons text-sm">delete</i>
                                                     </button>
                                                 </form>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty

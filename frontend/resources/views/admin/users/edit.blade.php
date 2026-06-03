@@ -39,6 +39,18 @@
                                     <input type="email" name="email" class="form-control" value="{{ old('email', $user['email']) }}" required>
                                 </div>
 
+                                <div class="input-group input-group-outline my-3 {{ old('password') ? 'is-filled' : '' }}">
+                                    <label class="form-label">Password Baru (Opsional)</label>
+                                    <input type="password" name="password" id="password" class="form-control" minlength="8">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mb-0 toggle-password" data-target="password" style="margin-left: 10px;">Lihat</button>
+                                </div>
+
+                                <div class="input-group input-group-outline my-3 {{ old('password_confirmation') ? 'is-filled' : '' }}">
+                                    <label class="form-label">Konfirmasi Password Baru</label>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" minlength="8">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mb-0 toggle-password" data-target="password_confirmation" style="margin-left: 10px;">Lihat</button>
+                                </div>
+
                                 <div class="input-group input-group-static my-3">
                                     <label class="ms-0">Role</label>
                                     <select name="role" class="form-control" required>
@@ -60,8 +72,12 @@
                                 <div class="form-check form-switch my-3">
                                     <input type="hidden" name="isActive" value="0">
                                     <input class="form-check-input" type="checkbox" name="isActive" value="1"
-                                        {{ old('isActive', $user['isActive'] ?? true) ? 'checked' : '' }}>
-                                    <label class="form-check-label">User Aktif</label>
+                                        {{ old('isActive', $user['isActive'] ?? true) ? 'checked' : '' }}
+                                        {{ (isset($authUser) && (isset($authUser['id']) ? $authUser['id'] : $authUser['_id'] ?? '') === $user['_id']) ? 'disabled' : '' }}>
+                                    <label class="form-check-label">User Aktif {{ (isset($authUser) && (isset($authUser['id']) ? $authUser['id'] : $authUser['_id'] ?? '') === $user['_id']) ? '(Tidak bisa menonaktifkan diri sendiri)' : '' }}</label>
+                                    @if(isset($authUser) && (isset($authUser['id']) ? $authUser['id'] : $authUser['_id'] ?? '') === $user['_id'])
+                                        <input type="hidden" name="isActive" value="1">
+                                    @endif
                                 </div>
 
                                 <div class="d-flex justify-content-end mt-4">
@@ -80,4 +96,38 @@
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
+
+    @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-password').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const target = document.getElementById(this.dataset.target);
+                    if (target.type === 'password') {
+                        target.type = 'text';
+                        this.textContent = 'Sembunyikan';
+                    } else {
+                        target.type = 'password';
+                        this.textContent = 'Lihat';
+                    }
+                });
+            });
+            
+            const inputs = document.querySelectorAll('.input-group.input-group-outline input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('is-focused');
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('is-focused');
+                    if (this.value) {
+                        this.parentElement.classList.add('is-filled');
+                    } else {
+                        this.parentElement.classList.remove('is-filled');
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layout>

@@ -36,7 +36,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email',
-            'password' => 'required|min:8',
+            'password' => 'required|min:8|confirmed',
             'role'     => 'required|in:admin,kepala_lab,kaprodi,staf_admin,staf_lab',
         ]);
 
@@ -74,9 +74,14 @@ class UserController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email',
+            'password' => 'nullable|min:8|confirmed',
             'role'     => 'required|in:admin,kepala_lab,kaprodi,staf_admin,staf_lab',
             'isActive' => 'required',
         ]);
+
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
 
         $validated['isActive'] = (bool) $validated['isActive'];
 
@@ -92,7 +97,12 @@ class UserController extends Controller
     /** DELETE /admin/users/{id} */
     public function destroy(string $id)
     {
-        $this->api->delete("/api/admin/users/{$id}");
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil dinonaktifkan.');
+        $response = $this->api->delete("/api/admin/users/{$id}");
+        
+        if ($response->successful()) {
+            return redirect()->route('admin.users.index')->with('success', $response->json('message') ?? 'User berhasil diproses.');
+        }
+
+        return redirect()->route('admin.users.index')->with('error', $response->json('message') ?? 'Gagal menghapus user.');
     }
 }
