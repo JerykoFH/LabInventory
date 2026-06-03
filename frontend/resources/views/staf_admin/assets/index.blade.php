@@ -284,7 +284,7 @@
                                                                     <div class="input-group input-group-outline is-filled">
                                                                         <label class="form-label">Tanggal Diterima <span class="text-danger">*</span></label>
                                                                         <input type="date" name="receivedDate" class="form-control" required
-                                                                            value="{{ $asset['receivedDate'] ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '' }}">
+                                                                            value="{{ !empty($asset['receivedDate']) ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '' }}">
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">

@@ -107,6 +107,7 @@ Berikut adalah daftar akun yang dapat Anda gunakan untuk masuk ke dalam sistem. 
 
 ## Fitur Utama Aplikasi
 - Manajemen Aset dan Ruangan: Dikelola secara penuh oleh Staf Admin.
+- Pemindai Barcode/QR Pintar: Memudahkan pencarian aset dan memungkinkan penambahan barang instan langsung menggunakan kamera perangkat.
 - Barang Habis Pakai dan Riwayat Pemeliharaan: Dikelola oleh Staf Lab.
 - Pengadaan Barang: Proses pengajuan draf oleh Kepala Lab yang kemudian direview dan disetujui oleh Kaprodi.
 - Cetak Laporan: Pimpinan laboratorium dapat mengunduh daftar inventaris dalam bentuk dokumen PDF maupun Microsoft Excel.

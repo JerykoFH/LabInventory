@@ -66,6 +66,9 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
     Route::patch('assets/{id}/receive',[InventoryController::class, 'setReceived'])->name('assets.receive');
+
+    // Scanner
+    Route::get('scanner',                                         [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
 });
 
 // Staf Laboratorium 
@@ -81,4 +84,7 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
     Route::get('maintenance/create',             [MaintenanceController::class, 'create'])->name('maintenance.create');
     Route::post('maintenance',                   [MaintenanceController::class, 'store'])->name('maintenance.store');
     Route::get('maintenance/{id}',               [MaintenanceController::class, 'show'])->name('maintenance.show');
+
+    // Scanner
+    Route::get('scanner',                        [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
 });
