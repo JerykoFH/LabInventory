@@ -29,13 +29,26 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.show', compact('draft'));
     }
 
-    // Tampilkan semua aset inventaris laboratorium
+    // Tampilkan semua aset inventaris laboratorium dengan filter penerimaan
     public function assets()
     {
-        $response = $this->api->get('/api/staf-admin/assets');
+        $status = request('status'); // 'received' untuk sudah diterima, 'pending' untuk belum
+        $query = $status === 'received' ? '?received=true' : ($status === 'pending' ? '?received=false' : '');
+        
+        $response = $this->api->get("/api/staf-admin/assets{$query}");
         $assets = $response->successful() ? $response->json('data') : [];
+        $received = $status;
 
-        return view('staf_admin.assets.index', compact('assets'));
+        return view('staf_admin.assets.index', compact('assets', 'received'));
+    }
+
+    // Tampilkan detail lengkap satu aset dengan informasi label, QR, dan tanggal penerimaan
+    public function show(string $id)
+    {
+        $response = $this->api->get("/api/staf-admin/assets/{$id}");
+        $asset = $response->successful() ? $response->json('data') : null;
+
+        return view('staf_admin.assets.show', compact('asset'));
     }
 
     // Simpan kode aset / label / QR yang diinput staf
@@ -51,22 +64,6 @@ class InventoryController extends Controller
 
         if ($response->successful()) {
             return redirect()->route('staf-admin.assets.index')->with('success', 'Label aset berhasil diperbarui.');
-        }
-
-        return back()->withErrors($response->json('message'));
-    }
-
-    // Simpan tanggal barang diterima secara fisik
-    public function setReceived(Request $request, string $id)
-    {
-        $validated = $request->validate([
-            'receivedDate' => 'required|date',
-        ]);
-
-        $response = $this->api->patch("/api/staf-admin/assets/{$id}/receive", $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('staf-admin.assets.index')->with('success', 'Tanggal penerimaan berhasil disimpan.');
         }
 
         return back()->withErrors($response->json('message'));

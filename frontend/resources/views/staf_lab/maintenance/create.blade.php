@@ -24,19 +24,19 @@
                             </div>
                             @endif
 
-                            <form action="{{ route('staf-lab.maintenance.store') }}" method="POST" id="maintenanceForm">
+                            <form action="{{ route('staf-lab.maintenance.store') }}" method="POST" id="maintenanceForm" enctype="multipart/form-data">
                                 @csrf
 
                                 <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mt-3 mb-3">Informasi Pemeliharaan</h6>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="input-group input-group-static my-3">
-                                            <label class="ms-0">Aset yang Dipelihara <span class="text-danger">*</span></label>
-                                            <select name="asset" class="form-control" required>
-                                                <option value="">-- Pilih Aset --</option>
-                                                @foreach($assets as $asset)
-                                                    <option value="{{ $asset['_id'] }}" {{ old('asset') == $asset['_id'] ? 'selected' : '' }}>
-                                                        {{ $asset['name'] }}{{ $asset['assetCode'] ? ' (' . $asset['assetCode'] . ')' : '' }}
+                                            <label class="ms-0">Ruangan yang Dimaintain <span class="text-danger">*</span></label>
+                                            <select name="room" class="form-control" id="roomSelect" required>
+                                                <option value="">-- Pilih Ruangan --</option>
+                                                @foreach($rooms as $room)
+                                                    <option value="{{ $room['_id'] }}" {{ old('room') == $room['_id'] ? 'selected' : '' }}>
+                                                        {{ $room['name'] }}{{ $room['code'] ? ' (' . $room['code'] . ')' : '' }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -58,29 +58,82 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-static my-3">
-                                            <label class="ms-0">Kondisi Aset Sebelum</label>
-                                            <select name="conditionBefore" class="form-control">
-                                                <option value="">-- Tidak dicatat --</option>
-                                                <option value="baik"         {{ old('conditionBefore') == 'baik' ? 'selected' : '' }}>Baik</option>
-                                                <option value="rusak_ringan" {{ old('conditionBefore') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
-                                                <option value="rusak_berat"  {{ old('conditionBefore') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
-                                            </select>
+                                </div>
+
+                                <hr class="horizontal dark my-4">
+
+                                <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mb-3">Aset yang Dipelihara & Kondisi</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <small class="text-secondary">Tambahkan aset-aset yang akan dipelihara (opsional)</small>
+                                    <button type="button" class="btn btn-sm bg-gradient-info mb-0" id="addAssetRow">
+                                        <i class="material-icons text-sm me-1">add</i> Tambah Aset
+                                    </button>
+                                </div>
+
+                                <div id="assetsContainer">
+                                    @if(old('assets') && is_array(old('assets')))
+                                        @foreach(old('assets') as $i => $assetData)
+                                        <div class="card card-body border card-plain border-radius-lg mb-3 asset-row">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0 text-sm">Detail Aset</h6>
+                                                <button type="button" class="btn btn-link text-danger p-0 m-0 remove-asset-row">
+                                                    <i class="material-icons">delete</i>
+                                                </button>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <div class="input-group input-group-static">
+                                                        <!-- Aset option dipopulate via JS, tapi kita akan set data ID-nya ke value -->
+                                                        <select name="assets[{{ $i }}][asset]" class="form-control asset-select" data-selected="{{ $assetData['asset'] ?? '' }}" required>
+                                                            <option value="{{ $assetData['asset'] ?? '' }}">{{ $assetData['asset'] ?? '-- Aset Terpilih --' }}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="input-group input-group-static">
+                                                        <label class="ms-0">Kondisi Sebelum</label>
+                                                        <select name="assets[{{ $i }}][conditionBefore]" class="form-control">
+                                                            <option value="">-- Tidak dicatat --</option>
+                                                            <option value="baik" {{ ($assetData['conditionBefore'] ?? '') == 'baik' ? 'selected' : '' }}>Baik</option>
+                                                            <option value="rusak_ringan" {{ ($assetData['conditionBefore'] ?? '') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                                            <option value="rusak_berat" {{ ($assetData['conditionBefore'] ?? '') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="input-group input-group-static">
+                                                        <label class="ms-0">Kondisi Sesudah</label>
+                                                        <select name="assets[{{ $i }}][conditionAfter]" class="form-control">
+                                                            <option value="">-- Tidak dicatat --</option>
+                                                            <option value="baik" {{ ($assetData['conditionAfter'] ?? '') == 'baik' ? 'selected' : '' }}>Baik</option>
+                                                            <option value="rusak_ringan" {{ ($assetData['conditionAfter'] ?? '') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                                            <option value="rusak_berat" {{ ($assetData['conditionAfter'] ?? '') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                                            <option value="tidak_aktif" {{ ($assetData['conditionAfter'] ?? '') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="input-group input-group-static">
+                                                        <label class="ms-0">Foto Kondisi Sebelum</label>
+                                                        <input type="file" name="assets[{{ $i }}][photoBefore]" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mb-2">
+                                                    <div class="input-group input-group-static">
+                                                        <label class="ms-0">Foto Kondisi Sesudah</label>
+                                                        <input type="file" name="assets[{{ $i }}][photoAfter]" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="input-group input-group-static my-3">
-                                            <label class="ms-0">Kondisi Aset Sesudah</label>
-                                            <select name="conditionAfter" class="form-control">
-                                                <option value="">-- Tidak dicatat --</option>
-                                                <option value="baik"         {{ old('conditionAfter') == 'baik' ? 'selected' : '' }}>Baik</option>
-                                                <option value="rusak_ringan" {{ old('conditionAfter') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
-                                                <option value="rusak_berat"  {{ old('conditionAfter') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
-                                                <option value="tidak_aktif"  {{ old('conditionAfter') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+
+                                <hr class="horizontal dark my-4">
+
+                                <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mt-3 mb-3">Dokumentasi Pekerjaan</h6>
+                                <div class="row">
                                     <div class="col-12">
                                         <div class="input-group input-group-dynamic my-3">
                                             <textarea name="description" class="form-control" rows="3" placeholder="Deskripsi pekerjaan yang dilakukan *" required>{{ old('description') }}</textarea>
@@ -120,7 +173,7 @@
                                             <div class="col-md-3">
                                                 <div class="input-group input-group-outline is-filled">
                                                     <label class="form-label">Jumlah Digunakan</label>
-                                                    <input type="number" name="consumablesUsed[{{ $i }}][quantityUsed]" class="form-control" min="0" step="0.01" value="{{ $usage['quantityUsed'] }}">
+                                                    <input type="number" name="consumablesUsed[{{ $i }}][quantityUsed]" class="form-control" min="0" value="{{ $usage['quantityUsed'] }}">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
@@ -151,8 +204,111 @@
 
     @push('js')
     <script>
-        const consumables = @json($consumables);
+        let assets = [];
+        const consumables = @json($consumables ?? []);
+        
         let bhpIndex = {{ old('consumablesUsed') ? count(old('consumablesUsed')) : 0 }};
+        let assetIndex = {{ old('assets') && is_array(old('assets')) ? count(old('assets')) : 0 }};
+
+        // Fetch assets when room changes
+        document.getElementById('roomSelect').addEventListener('change', async function() {
+            const roomId = this.value;
+            assets = [];
+            // Optional: clear container if room changes? 
+            // document.getElementById('assetsContainer').innerHTML = ''; 
+            
+            if (roomId) {
+                try {
+                    const response = await fetch(`/staf-lab/rooms/${roomId}/assets`);
+                    if (response.ok) {
+                        assets = await response.json();
+                        updateExistingAssetSelects();
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch assets", e);
+                }
+            }
+        });
+
+        // Initialize assets if room is already selected (e.g., from old input)
+        const initialRoomId = document.getElementById('roomSelect').value;
+        if (initialRoomId) {
+            document.getElementById('roomSelect').dispatchEvent(new Event('change'));
+        }
+
+        function updateExistingAssetSelects() {
+            const selects = document.querySelectorAll('.asset-select');
+            selects.forEach(select => {
+                const selectedValue = select.getAttribute('data-selected') || select.value;
+                let options = '<option value="">-- Pilih Aset --</option>';
+                assets.forEach(a => {
+                    const isSelected = (a._id === selectedValue) ? 'selected' : '';
+                    options += `<option value="${a._id}" ${isSelected}>${a.name}${a.assetCode ? ' (' + a.assetCode + ')' : ''}</option>`;
+                });
+                select.innerHTML = options;
+            });
+        }
+
+        function buildAssetRow(index) {
+            const options = assets.map(a =>
+                `<option value="${a._id}">${a.name}${a.assetCode ? ' (' + a.assetCode + ')' : ''}</option>`
+            ).join('');
+
+            return `
+                <div class="card card-body border card-plain border-radius-lg mb-3 asset-row">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 text-sm">Detail Aset</h6>
+                        <button type="button" class="btn btn-link text-danger p-0 m-0 remove-asset-row">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="input-group input-group-static">
+                                <select name="assets[${index}][asset]" class="form-control asset-select" required>
+                                    <option value="">-- Pilih Aset --</option>
+                                    ${options}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="input-group input-group-static">
+                                <label class="ms-0">Kondisi Sebelum</label>
+                                <select name="assets[${index}][conditionBefore]" class="form-control">
+                                    <option value="">-- Tidak dicatat --</option>
+                                    <option value="baik">Baik</option>
+                                    <option value="rusak_ringan">Rusak Ringan</option>
+                                    <option value="rusak_berat">Rusak Berat</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="input-group input-group-static">
+                                <label class="ms-0">Kondisi Sesudah</label>
+                                <select name="assets[${index}][conditionAfter]" class="form-control">
+                                    <option value="">-- Tidak dicatat --</option>
+                                    <option value="baik">Baik</option>
+                                    <option value="rusak_ringan">Rusak Ringan</option>
+                                    <option value="rusak_berat">Rusak Berat</option>
+                                    <option value="tidak_aktif">Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="input-group input-group-static">
+                                <label class="ms-0">Foto Kondisi Sebelum</label>
+                                <input type="file" name="assets[${index}][photoBefore]" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="input-group input-group-static">
+                                <label class="ms-0">Foto Kondisi Sesudah</label>
+                                <input type="file" name="assets[${index}][photoAfter]" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
 
         function buildBhpRow(index) {
             const options = consumables.map(c =>
@@ -172,7 +328,7 @@
                     <div class="col-md-3">
                         <div class="input-group input-group-outline is-filled">
                             <label class="form-label">Jumlah Digunakan</label>
-                            <input type="number" name="consumablesUsed[${index}][quantityUsed]" class="form-control" min="0" step="0.01" value="0">
+                            <input type="number" name="consumablesUsed[${index}][quantityUsed]" class="form-control" min="0" value="0">
                         </div>
                     </div>
                     <div class="col-md-2">
@@ -183,10 +339,28 @@
                 </div>`;
         }
 
+        // Tambah aset row
+        document.getElementById('addAssetRow').addEventListener('click', function () {
+            if (!document.getElementById('roomSelect').value) {
+                alert('Pilih ruangan terlebih dahulu untuk melihat aset.');
+                return;
+            }
+            document.getElementById('assetsContainer').insertAdjacentHTML('beforeend', buildAssetRow(assetIndex++));
+        });
+
+        // Tambah BHP row
         document.getElementById('addBhpRow').addEventListener('click', function () {
             document.getElementById('bhpContainer').insertAdjacentHTML('beforeend', buildBhpRow(bhpIndex++));
         });
 
+        // Hapus aset row
+        document.getElementById('assetsContainer').addEventListener('click', function (e) {
+            if (e.target.closest('.remove-asset-row')) {
+                e.target.closest('.asset-row').remove();
+            }
+        });
+
+        // Hapus BHP row
         document.getElementById('bhpContainer').addEventListener('click', function (e) {
             if (e.target.closest('.remove-bhp-row')) {
                 e.target.closest('.bhp-row').remove();

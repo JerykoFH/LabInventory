@@ -1,6 +1,7 @@
 const ConsumableItem = require('../models/ConsumableItem');
 const MaintenanceLog = require('../models/MaintenanceLog');
 const Asset = require('../models/Asset');
+const Room = require('../models/Room');
 
 // ── Consumable Stock Management ──────────────────────────────────────────────
 
@@ -60,16 +61,45 @@ const adjustStock = async (req, res) => {
     }
 };
 
+// ── Room Management ─────────────────────────────────────────────────────────
+
+/**
+ * GET /api/staf-lab/rooms
+ * Lihat semua ruangan untuk pilihan maintenance
+ */
+const getAllRooms = async (req, res) => {
+    try {
+        const rooms = await Room.find({ isActive: true }).sort({ name: 1 });
+        res.json({ success: true, count: rooms.length, data: rooms });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * GET /api/staf-lab/rooms/:id/assets
+ * Lihat semua aset dalam satu ruangan
+ */
+const getAssetsByRoom = async (req, res) => {
+    try {
+        const assets = await Asset.find({ room: req.params.id }).sort({ name: 1 });
+        res.json({ success: true, count: assets.length, data: assets });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // ── Maintenance Log ──────────────────────────────────────────────────────────
 
 /**
  * GET /api/staf-lab/maintenance
- * Lihat semua log maintenance
+ * Lihat semua log maintenance dengan ruangan dan aset yang di-maintain
  */
 const getAllMaintenanceLogs = async (req, res) => {
     try {
         const logs = await MaintenanceLog.find()
-            .populate('asset', 'name assetCode')
+            .populate('room', 'name code')
+            .populate('assets.asset', 'name assetCode')
             .populate('performedBy', 'name')
             .populate('consumablesUsed.item', 'name unit')
             .sort({ maintenanceDate: -1 });
@@ -82,19 +112,56 @@ const getAllMaintenanceLogs = async (req, res) => {
 /**
  * POST /api/staf-lab/maintenance
  * Buat log maintenance baru + kurangi stok BHP yang digunakan
- * Body: {
- *   asset, maintenanceDate, type, description,
- *   conditionBefore, conditionAfter, notes,
- *   consumablesUsed: [{ item: id, quantityUsed: number }]
- * }
  */
 const createMaintenanceLog = async (req, res) => {
     try {
-        const { asset, consumablesUsed, conditionAfter, ...rest } = req.body;
+        let room, consumablesUsed, type, description, notes, maintenanceDate;
+        let assets = [];
 
-        // Validasi asset ada
-        const assetDoc = await Asset.findById(asset);
-        if (!assetDoc) return res.status(404).json({ success: false, message: 'Asset not found' });
+        if (req.body.data) {
+            // If sent as multipart with a 'data' JSON string
+            const parsed = JSON.parse(req.body.data);
+            room = parsed.room;
+            consumablesUsed = parsed.consumablesUsed;
+            type = parsed.type;
+            description = parsed.description;
+            notes = parsed.notes;
+            maintenanceDate = parsed.maintenanceDate;
+            assets = parsed.assets || [];
+        } else {
+            // Normal JSON request
+            ({ room, assets, consumablesUsed, type, description, notes, maintenanceDate } = req.body);
+            assets = assets || [];
+        }
+
+        // Validasi ruangan ada
+        const roomDoc = await Room.findById(room);
+        if (!roomDoc) return res.status(404).json({ success: false, message: 'Room not found' });
+
+        // Validasi assets dan ambil ID-nya saja untuk cek ketersediaan
+        const assetIds = assets.map(a => a.asset).filter(id => id);
+        if (assetIds.length > 0) {
+            const assetDocs = await Asset.find({ _id: { $in: assetIds } });
+            if (assetDocs.length !== assetIds.length) {
+                return res.status(404).json({ success: false, message: 'Some assets not found' });
+            }
+        }
+
+        // Handle uploaded files mapping
+        if (req.files && req.files.length > 0) {
+            // files can be named like "photoBefore_0", "photoAfter_0" where 0 is the index in assets array
+            req.files.forEach(file => {
+                const match = file.fieldname.match(/^(photoBefore|photoAfter)_(\d+)$/);
+                if (match) {
+                    const field = match[1]; // photoBefore or photoAfter
+                    const index = parseInt(match[2], 10);
+                    if (assets[index]) {
+                        // Store the URL path
+                        assets[index][ field === 'photoBefore' ? 'conditionPhotoBefore' : 'conditionPhotoAfter' ] = `/uploads/maintenance/${file.filename}`;
+                    }
+                }
+            });
+        }
 
         // Kurangi stok BHP yang digunakan
         if (consumablesUsed && consumablesUsed.length > 0) {
@@ -115,22 +182,33 @@ const createMaintenanceLog = async (req, res) => {
         }
 
         // Update kondisi aset
-        if (conditionAfter) {
-            assetDoc.condition = conditionAfter;
-            if (conditionAfter === 'tidak_aktif') assetDoc.status = 'tidak_aktif';
-            await assetDoc.save();
+        if (assets.length > 0) {
+            for (const assetObj of assets) {
+                if (assetObj.conditionAfter) {
+                    const assetDoc = await Asset.findById(assetObj.asset);
+                    if (assetDoc) {
+                        assetDoc.condition = assetObj.conditionAfter;
+                        if (assetObj.conditionAfter === 'tidak_aktif') assetDoc.status = 'tidak_aktif';
+                        await assetDoc.save();
+                    }
+                }
+            }
         }
 
         const log = await MaintenanceLog.create({
-            asset,
+            room,
+            assets: assets,
             performedBy: req.user._id,
             consumablesUsed: consumablesUsed || [],
-            conditionAfter,
-            ...rest,
+            type,
+            description,
+            notes,
+            maintenanceDate,
         });
 
         const populated = await log.populate([
-            { path: 'asset', select: 'name assetCode' },
+            { path: 'room', select: 'name code' },
+            { path: 'assets.asset', select: 'name assetCode' },
             { path: 'consumablesUsed.item', select: 'name unit' },
         ]);
 
@@ -142,12 +220,13 @@ const createMaintenanceLog = async (req, res) => {
 
 /**
  * GET /api/staf-lab/maintenance/:id
- * Detail satu log maintenance
+ * Detail satu log maintenance dengan semua informasi ruangan, aset, dan consumable
  */
 const getMaintenanceLogById = async (req, res) => {
     try {
         const log = await MaintenanceLog.findById(req.params.id)
-            .populate('asset', 'name assetCode condition')
+            .populate('room', 'name code location')
+            .populate('assets.asset', 'name assetCode condition')
             .populate('performedBy', 'name email')
             .populate('consumablesUsed.item', 'name unit');
         if (!log) return res.status(404).json({ success: false, message: 'Log not found' });
@@ -159,5 +238,6 @@ const getMaintenanceLogById = async (req, res) => {
 
 module.exports = {
     getAllConsumables, createConsumable, adjustStock,
+    getAllRooms, getAssetsByRoom,
     getAllMaintenanceLogs, createMaintenanceLog, getMaintenanceLogById,
 };

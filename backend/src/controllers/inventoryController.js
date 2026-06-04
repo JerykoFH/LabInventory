@@ -40,14 +40,41 @@ const getLockedDraftDetail = async (req, res) => {
 /**
  * GET /api/staf-admin/assets
  * Lihat semua inventaris
+ * Query: ?received=true untuk hanya barang yang sudah diterima, ?received=false untuk belum diterima
  */
 const getAllAssets = async (req, res) => {
     try {
-        const assets = await Asset.find()
+        let filter = {};
+        const { received } = req.query;
+        
+        // Filter berdasarkan status penerimaan
+        if (received === 'true') {
+            filter.receivedDate = { $ne: null };
+        } else if (received === 'false') {
+            filter.receivedDate = null;
+        }
+
+        const assets = await Asset.find(filter)
             .populate('room', 'name code')
             .populate('replacedAsset', 'name assetCode')
             .sort({ createdAt: -1 });
         res.json({ success: true, count: assets.length, data: assets });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * GET /api/staf-admin/assets/:id
+ * Lihat detail lengkap satu aset dengan semua informasi (label, QR, tanggal terima, dll)
+ */
+const getAssetById = async (req, res) => {
+    try {
+        const asset = await Asset.findById(req.params.id)
+            .populate('room', 'name code')
+            .populate('replacedAsset', 'name assetCode');
+        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        res.json({ success: true, data: asset });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -75,26 +102,14 @@ const updateAssetLabel = async (req, res) => {
 
 /**
  * PATCH /api/staf-admin/assets/:id/receive
- * Input tanggal penerimaan barang
- * Body: { receivedDate }
+ * DEPRECATED: Fitur ini sudah tidak digunakan
+ * Tanggal penerimaan diatur otomatis oleh sistem saat barang masuk dari procurement
  */
 const setReceivedDate = async (req, res) => {
-    try {
-        const { receivedDate } = req.body;
-        if (!receivedDate) {
-            return res.status(400).json({ success: false, message: 'receivedDate is required' });
-        }
-
-        const asset = await Asset.findByIdAndUpdate(
-            req.params.id,
-            { receivedDate: new Date(receivedDate) },
-            { new: true }
-        );
-        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
-        res.json({ success: true, data: asset });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+    return res.status(403).json({ 
+        success: false, 
+        message: 'Operasi tidak diizinkan. Tanggal penerimaan diatur otomatis oleh sistem.' 
+    });
 };
 
-module.exports = { getLockedDrafts, getLockedDraftDetail, getAllAssets, updateAssetLabel, setReceivedDate };
+module.exports = { getLockedDrafts, getLockedDraftDetail, getAllAssets, getAssetById, updateAssetLabel, setReceivedDate };
