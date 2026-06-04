@@ -1,0 +1,30 @@
+# Documentation files
+IMPLEMENTATION_SUMMARY.md
+COMMIT_MESSAGE.txt
+PR_DESCRIPTION.md
+
+# Backend
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/dist/
+
+# Frontend
+frontend/node_modules/
+frontend/vendor/
+frontend/.env
+frontend/.env.local
+frontend/storage/
+frontend/bootstrap/cache/
+frontend/public/hot
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
