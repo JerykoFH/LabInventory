@@ -106,4 +106,49 @@ const setReceivedDate = async (req, res) => {
     }
 };
 
-module.exports = { getLockedDrafts, getLockedDraftDetail, getAllAssets, updateAssetLabel, setReceivedDate };
+/**
+ * GET /api/.../assets/scan/:code
+ * Cari aset berdasarkan assetCode atau qrCode
+ */
+const getAssetByCode = async (req, res) => {
+    try {
+        const { code } = req.params;
+        const asset = await Asset.findOne({
+            $or: [{ assetCode: code }, { qrCode: code }]
+        })
+        .populate('room', 'name code')
+        .populate('replacedAsset', 'name assetCode');
+
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+        res.json({ success: true, data: asset });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * POST /api/.../assets
+ * Tambah barang baru (biasanya hasil dari scan barcode baru)
+ * Body: { name, category, room, assetCode, ... }
+ */
+const createAsset = async (req, res) => {
+    try {
+        const newAsset = new Asset(req.body);
+        await newAsset.save();
+        res.status(201).json({ success: true, data: newAsset });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { 
+    getLockedDrafts, 
+    getLockedDraftDetail, 
+    getAllAssets, 
+    updateAssetLabel, 
+    setReceivedDate,
+    getAssetByCode,
+    createAsset
+};

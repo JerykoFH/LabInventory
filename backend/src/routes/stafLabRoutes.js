@@ -5,9 +5,15 @@ const {
     getAllConsumables, createConsumable, adjustStock,
     getAllMaintenanceLogs, createMaintenanceLog, getMaintenanceLogById,
 } = require('../controllers/labController');
+const { getAllAssets, getAssetByCode, createAsset } = require('../controllers/inventoryController');
 const { getAllRooms } = require('../controllers/roomController');
 
 router.use(protect, authorize('staf_lab'));
+
+// Aset
+router.get('/assets', getAllAssets);
+router.get('/assets/scan/:code', getAssetByCode);
+router.post('/assets', createAsset);
 
 // BHP
 router.get('/consumables', getAllConsumables);
