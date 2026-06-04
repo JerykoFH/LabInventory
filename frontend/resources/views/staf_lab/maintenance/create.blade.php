@@ -360,6 +360,27 @@
             }
         });
 
+        // Validasi duplikat aset
+        document.getElementById('assetsContainer').addEventListener('change', function(e) {
+            if (e.target.classList.contains('asset-select')) {
+                const selectedValue = e.target.value;
+                if (!selectedValue) return;
+
+                const selects = document.querySelectorAll('.asset-select');
+                let count = 0;
+                selects.forEach(select => {
+                    if (select.value === selectedValue) {
+                        count++;
+                    }
+                });
+
+                if (count > 1) {
+                    alert('Aset ini sudah dipilih! Silakan pilih aset yang berbeda.');
+                    e.target.value = ''; 
+                }
+            }
+        });
+
         // Hapus BHP row
         document.getElementById('bhpContainer').addEventListener('click', function (e) {
             if (e.target.closest('.remove-bhp-row')) {

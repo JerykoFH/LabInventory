@@ -147,6 +147,11 @@ const createMaintenanceLog = async (req, res) => {
             assets = assets || [];
         }
 
+        // Pastikan assets selalu berupa array
+        if (!Array.isArray(assets)) {
+            assets = Object.values(assets);
+        }
+
         // Pastikan ruangan (room) yang dimaksud benar-benar ada
         const roomDoc = await Room.findById(room);
         if (!roomDoc) return res.status(404).json({ success: false, message: 'Room not found' });

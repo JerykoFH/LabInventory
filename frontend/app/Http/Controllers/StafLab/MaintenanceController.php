@@ -64,7 +64,7 @@ class MaintenanceController extends Controller
 
         $data = $validated;
         
-        // Ekstrak files
+        // Ekstrak file
         $files = [];
         if (isset($request->assets) && is_array($request->assets)) {
             foreach ($request->assets as $index => $assetData) {
@@ -77,10 +77,18 @@ class MaintenanceController extends Controller
             }
         }
         
-        // Remove uploaded files from data array to prevent serialization issues
-        // We only send the text data in $data
+        // Hapus file upload agar tidak bermasalah saat serialisasi
+        // Kirim hanya data teks
         foreach ($data['assets'] ?? [] as $i => $assetData) {
             unset($data['assets'][$i]['photoBefore'], $data['assets'][$i]['photoAfter']);
+        }
+        
+        // Susun ulang index array agar saat diubah ke JSON hasilnya tetap berbentuk array, bukan object.
+        if (isset($data['assets'])) {
+            $data['assets'] = array_values($data['assets']);
+        }
+        if (isset($data['consumablesUsed'])) {
+            $data['consumablesUsed'] = array_values($data['consumablesUsed']);
         }
 
         $response = $this->api->postMultipart('/api/staf-lab/maintenance', $data, $files);
