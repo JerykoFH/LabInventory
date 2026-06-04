@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-// Controller staf lab — catat dan lihat log pemeliharaan aset
+// Catat dan kelola pemeliharaan aset laboratorium
 class MaintenanceController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    // Tampilkan semua log pemeliharaan, terbaru di atas
+    // Tampilkan semua catatan pemeliharaan, urut dari yang paling baru
     public function index()
     {
         $response = $this->api->get('/api/staf-lab/maintenance');
@@ -20,24 +20,28 @@ class MaintenanceController extends Controller
         return view('staf_lab.maintenance.index', compact('logs'));
     }
 
-    // Tampilkan form catat pemeliharaan (muat daftar aset & BHP untuk pilihan form)
+    // Siapkan form pemeliharaan dan muat data aset, BHP, dan ruangan untuk dropdown
     public function create()
     {
-        // Ambil daftar aset dan BHP untuk opsi form
+        // Ambil daftar aset, BHP, dan ruangan dari API untuk opsi di form
         $assetsResp = $this->api->get('/api/staf-admin/assets');
         $assets = $assetsResp->successful() ? $assetsResp->json('data') : [];
 
         $consumablesResp = $this->api->get('/api/staf-lab/consumables');
         $consumables = $consumablesResp->successful() ? $consumablesResp->json('data') : [];
 
-        return view('staf_lab.maintenance.create', compact('assets', 'consumables'));
+        $roomsResp = $this->api->get('/api/staf-lab/rooms');
+        $rooms = $roomsResp->successful() ? $roomsResp->json('data') : [];
+
+        return view('staf_lab.maintenance.create', compact('assets', 'consumables', 'rooms'));
     }
 
-    // Simpan log baru, kurangi stok BHP yang digunakan, dan update kondisi aset
+    // Catat pemeliharaan baru, update stok BHP yang dipakai, dan catat kondisi aset setelahnya
     public function store(Request $request)
     {
         $validated = $request->validate([
             'asset'                          => 'required|string',
+            'room'                           => 'nullable|string',
             'maintenanceDate'                => 'required|date',
             'type'                           => 'required|in:rutin,perbaikan,pengecekan',
             'description'                    => 'required|string',
@@ -59,7 +63,7 @@ class MaintenanceController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
-    // Tampilkan detail satu log pemeliharaan
+    // Tampilkan detail lengkap satu catatan pemeliharaan
     public function show(string $id)
     {
         $response = $this->api->get("/api/staf-lab/maintenance/{$id}");

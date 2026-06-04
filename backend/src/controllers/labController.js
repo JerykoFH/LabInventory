@@ -2,11 +2,11 @@ const ConsumableItem = require('../models/ConsumableItem');
 const MaintenanceLog = require('../models/MaintenanceLog');
 const Asset = require('../models/Asset');
 
-// ── Consumable Stock Management ──────────────────────────────────────────────
+// Mengelola stok barang habis pakai (BHP) — tambah, kurangi, lihat stok
 
 /**
  * GET /api/staf-lab/consumables
- * Lihat semua BHP beserta stok
+ * Ambil daftar semua barang habis pakai beserta stok terkini
  */
 const getAllConsumables = async (req, res) => {
     try {
@@ -19,11 +19,25 @@ const getAllConsumables = async (req, res) => {
 
 /**
  * POST /api/staf-lab/consumables
- * Tambah item BHP baru
+ * Daftarkan barang habis pakai baru
+ * Body: { name, category?, unit, currentStock?, minimumStock?, location?, notes? }
+ * Catatan: Stok dimulai dari 0 jika tidak ditentukan; minimumStock bersifat opsional
  */
 const createConsumable = async (req, res) => {
     try {
-        const item = await ConsumableItem.create(req.body);
+        const { name, unit, currentStock, minimumStock, ...rest } = req.body;
+        
+        if (!name || !unit) {
+            return res.status(400).json({ success: false, message: 'name and unit are required' });
+        }
+
+        const item = await ConsumableItem.create({
+            name,
+            unit,
+            currentStock: currentStock !== undefined ? currentStock : 0,
+            minimumStock: minimumStock !== undefined ? minimumStock : 5,
+            ...rest
+        });
         res.status(201).json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -32,10 +46,9 @@ const createConsumable = async (req, res) => {
 
 /**
  * PATCH /api/staf-lab/consumables/:id/stock
- * Update stok BHP (tambah/kurangi)
+ * Sesuaikan stok barang habis pakai (tambah atau kurangi)
  * Body: { adjustment: number, reason? }
- *   adjustment > 0 → tambah stok
- *   adjustment < 0 → kurangi stok
+ *   Nilai positif = menambah stok, Nilai negatif = mengurangi stok
  */
 const adjustStock = async (req, res) => {
     try {
@@ -60,16 +73,17 @@ const adjustStock = async (req, res) => {
     }
 };
 
-// ── Maintenance Log ──────────────────────────────────────────────────────────
+// Mencatat dan melacak pemeliharaan aset laboratorium
 
 /**
  * GET /api/staf-lab/maintenance
- * Lihat semua log maintenance
+ * Ambil semua catatan pemeliharaan aset yang sudah dilakukan
  */
 const getAllMaintenanceLogs = async (req, res) => {
     try {
         const logs = await MaintenanceLog.find()
             .populate('asset', 'name assetCode')
+            .populate('room', 'name code')
             .populate('performedBy', 'name')
             .populate('consumablesUsed.item', 'name unit')
             .sort({ maintenanceDate: -1 });
@@ -81,9 +95,9 @@ const getAllMaintenanceLogs = async (req, res) => {
 
 /**
  * POST /api/staf-lab/maintenance
- * Buat log maintenance baru + kurangi stok BHP yang digunakan
+ * Catat pemeliharaan aset baru dan otomatis kurangi stok BHP yang dipakai
  * Body: {
- *   asset, maintenanceDate, type, description,
+ *   asset, room, maintenanceDate, type, description,
  *   conditionBefore, conditionAfter, notes,
  *   consumablesUsed: [{ item: id, quantityUsed: number }]
  * }
@@ -92,11 +106,11 @@ const createMaintenanceLog = async (req, res) => {
     try {
         const { asset, consumablesUsed, conditionAfter, ...rest } = req.body;
 
-        // Validasi asset ada
+        // Pastikan barang (asset) yang dimaksud benar-benar ada
         const assetDoc = await Asset.findById(asset);
         if (!assetDoc) return res.status(404).json({ success: false, message: 'Asset not found' });
 
-        // Kurangi stok BHP yang digunakan
+        // Proses pengurangan stok untuk setiap BHP yang digunakan
         if (consumablesUsed && consumablesUsed.length > 0) {
             for (const usage of consumablesUsed) {
                 const consumable = await ConsumableItem.findById(usage.item);
@@ -114,9 +128,10 @@ const createMaintenanceLog = async (req, res) => {
             }
         }
 
-        // Update kondisi aset
+        // Perbarui kondisi barang setelah pemeliharaan
         if (conditionAfter) {
             assetDoc.condition = conditionAfter;
+            // Jika barangnya rusak berat atau tidak bisa diperbaiki, tandai sebagai tidak aktif
             if (conditionAfter === 'tidak_aktif') assetDoc.status = 'tidak_aktif';
             await assetDoc.save();
         }
@@ -131,6 +146,7 @@ const createMaintenanceLog = async (req, res) => {
 
         const populated = await log.populate([
             { path: 'asset', select: 'name assetCode' },
+            { path: 'room', select: 'name code' },
             { path: 'consumablesUsed.item', select: 'name unit' },
         ]);
 
@@ -142,12 +158,13 @@ const createMaintenanceLog = async (req, res) => {
 
 /**
  * GET /api/staf-lab/maintenance/:id
- * Detail satu log maintenance
+ * Lihat detail lengkap satu catatan pemeliharaan
  */
 const getMaintenanceLogById = async (req, res) => {
     try {
         const log = await MaintenanceLog.findById(req.params.id)
             .populate('asset', 'name assetCode condition')
+            .populate('room', 'name code')
             .populate('performedBy', 'name email')
             .populate('consumablesUsed.item', 'name unit');
         if (!log) return res.status(404).json({ success: false, message: 'Log not found' });

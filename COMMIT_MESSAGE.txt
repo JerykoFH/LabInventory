@@ -1,0 +1,29 @@
+feat: Implementasi sistem manajemen inventaris untuk Staff Admin dan Staff Lab
+
+Backend API:
+- Tambah endpoint GET /api/staf-lab/rooms untuk mendukung dropdown ruangan di form maintenance
+- Modifikasi PATCH /api/staf-admin/assets/:id/receive: Validasi mencegah perubahan tanggal penerimaan setelah barang diterima
+- Modifikasi POST /api/staf-lab/consumables: Buat currentStock opsional dengan default value 0
+- Tambah parameter room di POST /api/staf-lab/maintenance untuk tracking lokasi pemeliharaan
+- Populate room data di GET /api/staf-lab/maintenance dan GET /api/staf-lab/maintenance/:id
+
+Database Schema:
+- Tambah field room (ObjectId, ref: 'Room') di MaintenanceLog model untuk melacak ruangan tempat maintenance
+
+Frontend Controllers:
+- StafAdmin/InventoryController: Improve error handling untuk setReceived() dengan pesan lebih informatif
+- StafLab/ConsumableController: Ubah validasi currentStock dari required ke nullable
+- StafLab/MaintenanceController: Fetch rooms data di create() dan support room parameter di store()
+
+Documentation:
+- Humanisasi semua comments di 7 file untuk readability yang lebih baik
+- Update JSDoc dan inline comments menggunakan bahasa yang lebih natural
+
+Fitur Keamanan:
+- Semua routes terlindungi middleware autentikasi dan otorisasi berdasarkan role
+- Validasi mencegah perubahan data penerimaan yang tidak konsisten
+- Validasi stok mencegah nilai negatif pada barang habis pakai
+
+Routes:
+- Staff Admin: GET/PATCH procurements, GET/PATCH assets (dengan label dan receive date)
+- Staff Lab: GET/POST/PATCH consumables, GET/POST maintenance dengan tracking ruangan
