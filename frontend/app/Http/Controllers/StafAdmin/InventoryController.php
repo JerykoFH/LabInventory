@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-// Controller untuk staf administrasi — kelola label aset & penerimaan barang
+// Handle semua operasi inventory untuk staf admin: label aset dan pencatatan penerimaan barang
 class InventoryController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    // Tampilkan daftar pengadaan yang sudah final (status locked)
+    // Tampilkan daftar semua pengadaan yang sudah final (sudah dikunci oleh kaprodi)
     public function procurements()
     {
         $response = $this->api->get('/api/staf-admin/procurements');
@@ -20,7 +20,7 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.index', compact('drafts'));
     }
 
-    // Tampilkan detail satu pengadaan beserta item yang disetujui
+    // Tampilkan detail lengkap satu pengadaan beserta item-item yang sudah disetujui
     public function procurementDetail(string $id)
     {
         $response = $this->api->get("/api/staf-admin/procurements/{$id}");
@@ -29,7 +29,7 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.show', compact('draft'));
     }
 
-    // Tampilkan semua aset inventaris laboratorium
+    // Tampilkan daftar lengkap semua barang di inventaris laboratorium
     public function assets()
     {
         $response = $this->api->get('/api/staf-admin/assets');
@@ -38,7 +38,7 @@ class InventoryController extends Controller
         return view('staf_admin.assets.index', compact('assets'));
     }
 
-    // Simpan kode aset / label / QR yang diinput staf
+    // Simpan atau perbarui kode aset, foto label, atau QR code sesuai input staf
     public function updateLabel(Request $request, string $id)
     {
         $validated = $request->validate([
@@ -56,7 +56,8 @@ class InventoryController extends Controller
         return back()->withErrors($response->json('message'));
     }
 
-    // Simpan tanggal barang diterima secara fisik
+    // Catat tanggal barang diterima secara fisik
+    // Penting: Setelah dicatat, tanggal tidak bisa diubah lagi!
     public function setReceived(Request $request, string $id)
     {
         $validated = $request->validate([
@@ -66,9 +67,11 @@ class InventoryController extends Controller
         $response = $this->api->patch("/api/staf-admin/assets/{$id}/receive", $validated);
 
         if ($response->successful()) {
-            return redirect()->route('staf-admin.assets.index')->with('success', 'Tanggal penerimaan berhasil disimpan.');
+            return redirect()->route('staf-admin.assets.index')
+                ->with('success', 'Tanggal penerimaan berhasil disimpan.');
         }
 
-        return back()->withErrors($response->json('message'));
+        $errorMsg = $response->json('message', 'Gagal menyimpan tanggal penerimaan.');
+        return back()->withErrors($errorMsg);
     }
 }

@@ -4,7 +4,7 @@ const ProcurementItem = require('../models/ProcurementItem');
 
 /**
  * GET /api/staf-admin/procurements
- * Lihat draf yang sudah locked (disetujui kaprodi)
+ * Ambil semua draf pengadaan yang sudah dikunci oleh kaprodi
  */
 const getLockedDrafts = async (req, res) => {
     try {
@@ -20,7 +20,7 @@ const getLockedDrafts = async (req, res) => {
 
 /**
  * GET /api/staf-admin/procurements/:id
- * Lihat detail draf locked + items yang approved
+ * Lihat detail draf yang sudah dikunci beserta item-item yang sudah disetujui
  */
 const getLockedDraftDetail = async (req, res) => {
     try {
@@ -39,7 +39,7 @@ const getLockedDraftDetail = async (req, res) => {
 
 /**
  * GET /api/staf-admin/assets
- * Lihat semua inventaris
+ * Ambil daftar semua barang inventaris laboratorium
  */
 const getAllAssets = async (req, res) => {
     try {
@@ -55,7 +55,7 @@ const getAllAssets = async (req, res) => {
 
 /**
  * PATCH /api/staf-admin/assets/:id/label
- * Update label / QR / barcode aset
+ * Update kode aset, foto label, atau QR code barang
  * Body: { assetCode, labelPhoto, qrCode }
  */
 const updateAssetLabel = async (req, res) => {
@@ -75,8 +75,9 @@ const updateAssetLabel = async (req, res) => {
 
 /**
  * PATCH /api/staf-admin/assets/:id/receive
- * Input tanggal penerimaan barang
+ * Catat tanggal barang diterima secara fisik
  * Body: { receivedDate }
+ * PENTING: Setelah barang diterima, tanggal tidak bisa diubah lagi!
  */
 const setReceivedDate = async (req, res) => {
     try {
@@ -85,12 +86,20 @@ const setReceivedDate = async (req, res) => {
             return res.status(400).json({ success: false, message: 'receivedDate is required' });
         }
 
-        const asset = await Asset.findByIdAndUpdate(
-            req.params.id,
-            { receivedDate: new Date(receivedDate) },
-            { new: true }
-        );
+        const asset = await Asset.findById(req.params.id);
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+
+        // Jika barang sudah pernah diterima, tidak boleh mengubah tanggalnya
+        if (asset.receivedDate) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Barang sudah diterima. Tanggal penerimaan tidak bisa diubah.',
+                data: { currentReceivedDate: asset.receivedDate }
+            });
+        }
+
+        asset.receivedDate = new Date(receivedDate);
+        await asset.save();
         res.json({ success: true, data: asset });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
