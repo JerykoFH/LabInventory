@@ -64,11 +64,11 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('procurements',         [InventoryController::class, 'procurements'])->name('procurements.index');
     Route::get('procurements/{id}',    [InventoryController::class, 'procurementDetail'])->name('procurements.show');
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
+    Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
-    Route::patch('assets/{id}/receive',[InventoryController::class, 'setReceived'])->name('assets.receive');
 
     // Scanner
-    Route::get('scanner',                                         [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
+    Route::get('scanner',              [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
 });
 
 // Staf Laboratorium 
@@ -80,6 +80,7 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
     Route::patch('consumables/{id}/stock',       [ConsumableController::class, 'adjustStock'])->name('consumables.stock');
 
     // Maintenance
+    Route::get('rooms/{id}/assets',              [MaintenanceController::class, 'getAssetsByRoom'])->name('rooms.assets');
     Route::get('maintenance',                    [MaintenanceController::class, 'index'])->name('maintenance.index');
     Route::get('maintenance/create',             [MaintenanceController::class, 'create'])->name('maintenance.create');
     Route::post('maintenance',                   [MaintenanceController::class, 'store'])->name('maintenance.store');

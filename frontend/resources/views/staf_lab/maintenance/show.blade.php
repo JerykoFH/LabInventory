@@ -18,26 +18,6 @@
                     'pengecekan' => 'bg-gradient-secondary',
                     default      => 'bg-gradient-secondary'
                 };
-                $condAfterLabel = match($log['conditionAfter'] ?? '') {
-                    'baik'        => 'Baik',
-                    'rusak_ringan'=> 'Rusak Ringan',
-                    'rusak_berat' => 'Rusak Berat',
-                    'tidak_aktif' => 'Tidak Aktif',
-                    default       => '-'
-                };
-                $condAfterColor = match($log['conditionAfter'] ?? '') {
-                    'baik'        => 'bg-gradient-success',
-                    'rusak_ringan'=> 'bg-gradient-warning',
-                    'rusak_berat' => 'bg-gradient-danger',
-                    'tidak_aktif' => 'bg-gradient-secondary',
-                    default       => 'bg-gradient-secondary'
-                };
-                $condBeforeLabel = match($log['conditionBefore'] ?? '') {
-                    'baik'        => 'Baik',
-                    'rusak_ringan'=> 'Rusak Ringan',
-                    'rusak_berat' => 'Rusak Berat',
-                    default       => '-'
-                };
             @endphp
 
             <div class="row">
@@ -47,7 +27,7 @@
                             <div class="{{ $typeColor }} shadow border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
                                 <div>
                                     <h6 class="text-white text-capitalize ps-3 mb-0">
-                                        {{ $log['asset']['name'] ?? 'Aset tidak diketahui' }}
+                                        Pemeliharaan di Ruangan: {{ $log['room']['name'] ?? 'Tidak diketahui' }}
                                     </h6>
                                     <p class="text-white text-xs ps-3 mb-0 opacity-8">
                                         {{ isset($log['maintenanceDate']) ? \Carbon\Carbon::parse($log['maintenanceDate'])->format('d M Y') : '-' }}
@@ -59,19 +39,7 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="text-uppercase text-secondary text-xxs font-weight-bolder">Kode Aset</label>
-                                    <p class="text-sm font-weight-bold mb-0">{{ $log['asset']['assetCode'] ?? '-' }}</p>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="text-uppercase text-secondary text-xxs font-weight-bolder">Kondisi Sebelum</label>
-                                    <p class="mb-0"><span class="badge bg-gradient-secondary">{{ $condBeforeLabel }}</span></p>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="text-uppercase text-secondary text-xxs font-weight-bolder">Kondisi Sesudah</label>
-                                    <p class="mb-0"><span class="badge {{ $condAfterColor }}">{{ $condAfterLabel }}</span></p>
-                                </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label class="text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</label>
                                     <p class="mb-0"><span class="badge {{ $typeColor }}">{{ $typeLabel }}</span></p>
                                 </div>
@@ -86,6 +54,79 @@
                                 </div>
                                 @endif
                             </div>
+
+                            <h6 class="text-uppercase text-secondary text-xs font-weight-bolder mt-4 mb-3">Aset yang Dipelihara</h6>
+                            @if(count($log['assets'] ?? []) > 0)
+                                <div class="table-responsive">
+                                    <table class="table align-items-center mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aset</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kondisi Sebelum</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kondisi Sesudah</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Foto Sebelum</th>
+                                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Foto Sesudah</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($log['assets'] as $assetData)
+                                            @php
+                                                $cBeforeLabel = match($assetData['conditionBefore'] ?? '') {
+                                                    'baik'        => 'Baik',
+                                                    'rusak_ringan'=> 'Rusak Ringan',
+                                                    'rusak_berat' => 'Rusak Berat',
+                                                    default       => '-'
+                                                };
+                                                $cAfterLabel = match($assetData['conditionAfter'] ?? '') {
+                                                    'baik'        => 'Baik',
+                                                    'rusak_ringan'=> 'Rusak Ringan',
+                                                    'rusak_berat' => 'Rusak Berat',
+                                                    'tidak_aktif' => 'Tidak Aktif',
+                                                    default       => '-'
+                                                };
+                                                $cAfterColor = match($assetData['conditionAfter'] ?? '') {
+                                                    'baik'        => 'bg-gradient-success',
+                                                    'rusak_ringan'=> 'bg-gradient-warning',
+                                                    'rusak_berat' => 'bg-gradient-danger',
+                                                    'tidak_aktif' => 'bg-gradient-secondary',
+                                                    default       => 'bg-gradient-secondary'
+                                                };
+                                            @endphp
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex flex-column justify-content-center px-2">
+                                                        <h6 class="mb-0 text-sm">{{ $assetData['asset']['name'] ?? 'Aset tidak ditemukan' }}</h6>
+                                                        <p class="text-xs text-secondary mb-0">{{ $assetData['asset']['assetCode'] ?? '-' }}</p>
+                                                    </div>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <span class="badge bg-gradient-secondary">{{ $cBeforeLabel }}</span>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    <span class="badge {{ $cAfterColor }}">{{ $cAfterLabel }}</span>
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    @if(isset($assetData['photoBefore']) && $assetData['photoBefore'])
+                                                        <a href="{{ $assetData['photoBefore'] }}" target="_blank" class="text-info text-xs"><i class="material-icons text-sm">image</i> Lihat Foto</a>
+                                                    @else
+                                                        <span class="text-secondary text-xs">-</span>
+                                                    @endif
+                                                </td>
+                                                <td class="align-middle text-center">
+                                                    @if(isset($assetData['photoAfter']) && $assetData['photoAfter'])
+                                                        <a href="{{ $assetData['photoAfter'] }}" target="_blank" class="text-info text-xs"><i class="material-icons text-sm">image</i> Lihat Foto</a>
+                                                    @else
+                                                        <span class="text-secondary text-xs">-</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <p class="text-sm text-secondary">Tidak ada aset spesifik yang dicatat dalam pemeliharaan ini.</p>
+                            @endif
                         </div>
                     </div>
                 </div>

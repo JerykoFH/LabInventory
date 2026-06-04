@@ -139,46 +139,7 @@
                                                 @endif
                                             </td>
                                             <td class="align-middle text-center">
-                                                @if($item['itemType'] === 'asset' && ($item['asset']['_id'] ?? false))
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-outline-primary mb-0 px-2 py-1"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#receiveModal{{ $item['asset']['_id'] }}">
-                                                        <i class="material-icons text-sm">edit_calendar</i>
-                                                    </button>
-
-                                                    {{-- Modal Input Tanggal Terima --}}
-                                                    <div class="modal fade" id="receiveModal{{ $item['asset']['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                                            <div class="modal-content text-start">
-                                                                <form action="{{ route('staf-admin.assets.receive', $item['asset']['_id']) }}" method="POST">
-                                                                    @csrf
-                                                                    @method('PATCH')
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title font-weight-normal">Input Tanggal Penerimaan</h5>
-                                                                        <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <p class="text-sm text-secondary mb-3">Barang: <strong>{{ $item['name'] }}</strong></p>
-                                                                        <div class="input-group input-group-outline">
-                                                                            <label class="form-label">Tanggal Diterima</label>
-                                                                            <input type="date" name="receivedDate" class="form-control" required
-                                                                                value="{{ $item['asset']['receivedDate'] ? \Carbon\Carbon::parse($item['asset']['receivedDate'])->format('Y-m-d') : '' }}">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                        <button type="submit" class="btn bg-gradient-primary">Simpan</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <span class="text-xs text-secondary">-</span>
-                                                @endif
+                                                <span class="text-xs text-secondary">-</span>
                                             </td>
                                         </tr>
                                         @empty

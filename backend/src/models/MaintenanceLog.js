@@ -2,11 +2,39 @@ const mongoose = require('mongoose');
 
 // Catatan setiap kali staf lab melakukan pemeliharaan pada suatu aset
 const maintenanceLogSchema = new mongoose.Schema({
-    asset: {
+    // Ruangan yang di-maintain
+    room: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Asset',
+        ref: 'Room',
         required: true,
     },
+    // Asset yang dipelihara (bisa multiple)
+    assets: [
+        {
+            asset: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Asset',
+                required: true,
+            },
+            conditionBefore: {
+                type: String,
+                enum: ['baik', 'rusak_ringan', 'rusak_berat', ''],
+            },
+            conditionAfter: {
+                type: String,
+                enum: ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif', ''],
+            },
+            // Foto kondisi sebelum dan sesudah maintenance
+            conditionPhotoBefore: {
+                type: String,
+                trim: true,
+            },
+            conditionPhotoAfter: {
+                type: String,
+                trim: true,
+            },
+        }
+    ],
     performedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -26,19 +54,6 @@ const maintenanceLogSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Maintenance description is required'],
         trim: true,
-    },
-    conditionBefore: {
-        type: String,
-        enum: ['baik', 'rusak_ringan', 'rusak_berat'],
-    },
-    conditionAfter: {
-        type: String,
-        enum: ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif'],
-    },
-    // Ruangan tempat pemeliharaan dilakukan
-    room: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Room',
     },
     // Daftar barang habis pakai yang terpakai selama pemeliharaan
     consumablesUsed: [

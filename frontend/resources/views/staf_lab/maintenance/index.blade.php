@@ -56,14 +56,20 @@
                                                 'pengecekan' => 'Pengecekan',
                                                 default      => $log['type']
                                             };
-                                            $condColor = match($log['conditionAfter'] ?? '') {
+                                            $firstAssetInfo = count($log['assets'] ?? []) > 0 ? $log['assets'][0] : null;
+                                            $assetName = $firstAssetInfo ? ($firstAssetInfo['asset']['name'] ?? 'Aset tidak ditemukan') : 'Ruangan Saja';
+                                            $assetCode = $firstAssetInfo ? ($firstAssetInfo['asset']['assetCode'] ?? '') : '';
+                                            if (count($log['assets'] ?? []) > 1) {
+                                                $assetName .= ' (+' . (count($log['assets']) - 1) . ' lainnya)';
+                                            }
+                                            $condColor = match($firstAssetInfo['conditionAfter'] ?? '') {
                                                 'baik'        => 'bg-gradient-success',
                                                 'rusak_ringan'=> 'bg-gradient-warning',
                                                 'rusak_berat' => 'bg-gradient-danger',
                                                 'tidak_aktif' => 'bg-gradient-secondary',
                                                 default       => 'bg-gradient-secondary'
                                             };
-                                            $condLabel = match($log['conditionAfter'] ?? '') {
+                                            $condLabel = match($firstAssetInfo['conditionAfter'] ?? '') {
                                                 'baik'        => 'Baik',
                                                 'rusak_ringan'=> 'Rusak Ringan',
                                                 'rusak_berat' => 'Rusak Berat',
@@ -78,9 +84,9 @@
                                                         <i class="material-icons opacity-10 text-white" style="font-size: 16px;">build</i>
                                                     </div>
                                                     <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ $log['asset']['name'] ?? 'Aset tidak ditemukan' }}</h6>
-                                                        @if($log['asset']['assetCode'] ?? false)
-                                                            <p class="text-xs text-secondary mb-0">{{ $log['asset']['assetCode'] }}</p>
+                                                        <h6 class="mb-0 text-sm">{{ $assetName }}</h6>
+                                                        @if($assetCode)
+                                                            <p class="text-xs text-secondary mb-0">{{ $assetCode }}</p>
                                                         @endif
                                                     </div>
                                                 </div>

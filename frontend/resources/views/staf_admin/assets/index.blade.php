@@ -217,15 +217,6 @@
                                                     <i class="material-icons text-sm">qr_code</i>
                                                 </button>
 
-                                                {{-- Edit Tanggal Terima --}}
-                                                <button type="button"
-                                                    class="btn btn-link text-warning text-xs p-0 mb-0"
-                                                    title="Input Tanggal Penerimaan"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#receiveModal{{ $asset['_id'] }}">
-                                                    <i class="material-icons text-sm">edit_calendar</i>
-                                                </button>
-
                                                 {{-- Modal Label --}}
                                                 <div class="modal fade" id="labelModal{{ $asset['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -265,37 +256,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {{-- Modal Tanggal Penerimaan --}}
-                                                <div class="modal fade" id="receiveModal{{ $asset['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                                        <div class="modal-content text-start">
-                                                            <form action="{{ route('staf-admin.assets.receive', $asset['_id']) }}" method="POST">
-                                                                @csrf
-                                                                @method('PATCH')
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title font-weight-normal">Input Tanggal Penerimaan</h5>
-                                                                    <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
-                                                                    <div class="input-group input-group-outline is-filled">
-                                                                        <label class="form-label">Tanggal Diterima <span class="text-danger">*</span></label>
-                                                                        <input type="date" name="receivedDate" class="form-control" required
-                                                                            value="{{ !empty($asset['receivedDate']) ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '' }}">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                    <button type="submit" class="btn bg-gradient-primary">Simpan</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
                                             </td>
                                         </tr>
                                         @empty
@@ -320,7 +280,6 @@
 
     @push('js')
     <script>
-
         document.getElementById('searchAsset').addEventListener('input', function() {
             const query = this.value.toLowerCase();
             document.querySelectorAll('.asset-row').forEach(function(row) {

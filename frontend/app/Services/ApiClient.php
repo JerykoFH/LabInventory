@@ -40,6 +40,20 @@ class ApiClient
         return $this->http()->post($endpoint, $data);
     }
 
+    public function postMultipart(string $endpoint, array $data = [], array $files = [])
+    {
+        $http = $this->http();
+        
+        foreach ($files as $name => $file) {
+            if ($file instanceof \Illuminate\Http\UploadedFile) {
+                $http->attach($name, file_get_contents($file->path()), $file->getClientOriginalName());
+            }
+        }
+
+        // Send non-file data as 'data' JSON string to simplify parsing in Node.js multer
+        return $http->post($endpoint, ['data' => json_encode($data)]);
+    }
+
     public function put(string $endpoint, array $data = [])
     {
         return $this->http()->put($endpoint, $data);
