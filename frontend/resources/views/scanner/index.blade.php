@@ -107,9 +107,13 @@
                                 <h6 class="text-danger mt-2">Barang Tidak Ditemukan</h6>
                                 <p class="text-sm text-secondary mb-3">Barcode <strong id="not-found-code"></strong> belum terdaftar di sistem inventaris.</p>
 
+                                @if($rolePrefix === 'staf-admin')
                                 <button type="button" class="btn bg-gradient-primary w-100" data-bs-toggle="modal" data-bs-target="#addAssetModal">
                                     <i class="material-icons me-1">add</i> Tambahkan sebagai Barang Baru
                                 </button>
+                                @else
+                                <p class="text-sm text-warning mt-2">Anda tidak memiliki akses untuk menambahkan barang baru. Silakan hubungi Staf Admin.</p>
+                                @endif
                             </div>
 
                         </div>
@@ -160,6 +164,7 @@
         }
     </style>
 
+    @if($rolePrefix === 'staf-admin')
     <div class="modal fade" id="addAssetModal" tabindex="-1" role="dialog" aria-labelledby="addAssetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -224,6 +229,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     @push('js')
 
@@ -331,7 +337,10 @@
                 } else {
 
                     document.getElementById('not-found-code').innerText = decodedText;
-                    document.getElementById('input-assetCode').value = decodedText; // Pre-fill form
+                    const inputAssetCode = document.getElementById('input-assetCode');
+                    if (inputAssetCode) {
+                        inputAssetCode.value = decodedText; 
+                    }
                     switchState('notfound');
                 }
             })
@@ -391,68 +400,72 @@
                     });
 
                     const select = document.getElementById('input-room');
-                    select.innerHTML = '<option value="">(Pilih Ruangan)</option>';
-                    for (const [id, name] of Object.entries(rooms)) {
-                        select.innerHTML += `<option value="${id}">${name}</option>`;
+                    if (select) {
+                        select.innerHTML = '<option value="">(Pilih Ruangan)</option>';
+                        for (const [id, name] of Object.entries(rooms)) {
+                            select.innerHTML += `<option value="${id}">${name}</option>`;
+                        }
                     }
                 }
             }).catch(e => console.log('Error fetching rooms for dropdown', e));
 
-            document.getElementById('btnSaveAsset').addEventListener('click', function() {
-                const payload = {
-                    assetCode: document.getElementById('input-assetCode').value,
-                    name: document.getElementById('input-name').value,
-                    category: document.getElementById('input-category').value,
-                    condition: document.getElementById('input-condition').value,
-                    status: document.getElementById('input-status').value,
-                    itemType: 'devices'
-                };
+            if (document.getElementById('btnSaveAsset')) {
+                document.getElementById('btnSaveAsset').addEventListener('click', function() {
+                    const payload = {
+                        assetCode: document.getElementById('input-assetCode').value,
+                        name: document.getElementById('input-name').value,
+                        category: document.getElementById('input-category').value,
+                        condition: document.getElementById('input-condition').value,
+                        status: document.getElementById('input-status').value,
+                        itemType: 'devices'
+                    };
 
-                const roomId = document.getElementById('input-room').value;
-                if(roomId) payload.room = roomId;
+                    const roomId = document.getElementById('input-room').value;
+                    if(roomId) payload.room = roomId;
 
-                if(!payload.name) {
-                    alert('Nama barang wajib diisi!');
-                    return;
-                }
-
-                const btn = this;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = 'Menyimpan...';
-                btn.disabled = true;
-
-                fetch(`${API_BASE_URL}/api/${ROLE_PREFIX}/assets`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${API_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if(res.success) {
-                        alert('Barang baru berhasil ditambahkan!');
-
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('addAssetModal'));
-                        if(modal) modal.hide();
-
-                        document.getElementById('addAssetForm').reset();
-
-                        onScanSuccess(payload.assetCode, null);
-                    } else {
-                        alert('Gagal menyimpan: ' + (res.message || 'Error'));
+                    if(!payload.name) {
+                        alert('Nama barang wajib diisi!');
+                        return;
                     }
-                })
-                .catch(err => {
-                    alert('Terjadi kesalahan server.');
-                })
-                .finally(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
+
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = 'Menyimpan...';
+                    btn.disabled = true;
+
+                    fetch(`${API_BASE_URL}/api/${ROLE_PREFIX}/assets`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_TOKEN}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(r => r.json())
+                    .then(res => {
+                        if(res.success) {
+                            alert('Barang baru berhasil ditambahkan!');
+
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('addAssetModal'));
+                            if(modal) modal.hide();
+
+                            document.getElementById('addAssetForm').reset();
+
+                            onScanSuccess(payload.assetCode, null);
+                        } else {
+                            alert('Gagal menyimpan: ' + (res.message || 'Error'));
+                        }
+                    })
+                    .catch(err => {
+                        alert('Terjadi kesalahan server.');
+                    })
+                    .finally(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
                 });
-            });
+            }
         });
     </script>
     @endpush
