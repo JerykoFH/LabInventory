@@ -4,7 +4,7 @@ const ProcurementItem = require('../models/ProcurementItem');
 
 /**
  * GET /api/staf-admin/procurements
- * Lihat draf yang sudah locked (disetujui kaprodi)
+ * Ambil semua draf pengadaan yang sudah dikunci oleh kaprodi
  */
 const getLockedDrafts = async (req, res) => {
     try {
@@ -20,7 +20,7 @@ const getLockedDrafts = async (req, res) => {
 
 /**
  * GET /api/staf-admin/procurements/:id
- * Lihat detail draf locked + items yang approved
+ * Lihat detail draf yang sudah dikunci beserta item-item yang sudah disetujui
  */
 const getLockedDraftDetail = async (req, res) => {
     try {
@@ -39,7 +39,7 @@ const getLockedDraftDetail = async (req, res) => {
 
 /**
  * GET /api/staf-admin/assets
- * Lihat semua inventaris
+ * Ambil daftar semua barang inventaris laboratorium
  * Query: ?received=true untuk hanya barang yang sudah diterima, ?received=false untuk belum diterima
  */
 const getAllAssets = async (req, res) => {
@@ -82,7 +82,7 @@ const getAssetById = async (req, res) => {
 
 /**
  * PATCH /api/staf-admin/assets/:id/label
- * Update label / QR / barcode aset
+ * Update kode aset, foto label, atau QR code barang
  * Body: { assetCode, labelPhoto, qrCode }
  */
 const updateAssetLabel = async (req, res) => {
@@ -112,4 +112,50 @@ const setReceivedDate = async (req, res) => {
     });
 };
 
-module.exports = { getLockedDrafts, getLockedDraftDetail, getAllAssets, getAssetById, updateAssetLabel, setReceivedDate };
+/**
+ * GET /api/.../assets/scan/:code
+ * Cari aset berdasarkan assetCode atau qrCode
+ */
+const getAssetByCode = async (req, res) => {
+    try {
+        const { code } = req.params;
+        const asset = await Asset.findOne({
+            $or: [{ assetCode: code }, { qrCode: code }]
+        })
+        .populate('room', 'name code')
+        .populate('replacedAsset', 'name assetCode');
+
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' });
+        }
+        res.json({ success: true, data: asset });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * POST /api/.../assets
+ * Tambah barang baru (biasanya hasil dari scan barcode baru)
+ * Body: { name, category, room, assetCode, ... }
+ */
+const createAsset = async (req, res) => {
+    try {
+        const newAsset = new Asset(req.body);
+        await newAsset.save();
+        res.status(201).json({ success: true, data: newAsset });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { 
+    getLockedDrafts, 
+    getLockedDraftDetail, 
+    getAllAssets, 
+    getAssetById,
+    updateAssetLabel, 
+    setReceivedDate,
+    getAssetByCode,
+    createAsset
+};

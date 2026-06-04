@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-// Controller staf lab — catat dan lihat log pemeliharaan aset
+// Catat dan kelola pemeliharaan aset laboratorium
 class MaintenanceController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    // Tampilkan semua log pemeliharaan, terbaru di atas
+    // Tampilkan semua catatan pemeliharaan, urut dari yang paling baru
     public function index()
     {
         $response = $this->api->get('/api/staf-lab/maintenance');
@@ -27,22 +27,22 @@ class MaintenanceController extends Controller
         return response()->json($response->successful() ? $response->json('data') : []);
     }
 
-    // Tampilkan form catat pemeliharaan
+    // Siapkan form pemeliharaan dan muat data BHP serta ruangan untuk dropdown
     public function create()
     {
         // Ambil daftar ruangan untuk opsi form
         $roomsResp = $this->api->get('/api/staf-lab/rooms');
         $rooms = $roomsResp->successful() ? $roomsResp->json('data') : [];
 
-        // Hapus pemanggilan API aset di awal, karena sekarang diambil via AJAX saat ruangan dipilih
-
+        // Ambil daftar BHP
         $consumablesResp = $this->api->get('/api/staf-lab/consumables');
         $consumables = $consumablesResp->successful() ? $consumablesResp->json('data') : [];
 
+        // Data aset tidak diambil di awal, melainkan via AJAX (getAssetsByRoom) saat ruangan dipilih
         return view('staf_lab.maintenance.create', compact('rooms', 'consumables'));
     }
 
-    // Simpan log baru, kurangi stok BHP yang digunakan, dan update kondisi aset
+    // Catat pemeliharaan baru, update stok BHP yang dipakai, dan catat kondisi aset setelahnya
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -93,7 +93,7 @@ class MaintenanceController extends Controller
         return back()->withErrors($response->json('message') ?? 'Terjadi kesalahan pada server.')->withInput();
     }
 
-    // Tampilkan detail satu log pemeliharaan
+    // Tampilkan detail lengkap satu catatan pemeliharaan
     public function show(string $id)
     {
         $response = $this->api->get("/api/staf-lab/maintenance/{$id}");

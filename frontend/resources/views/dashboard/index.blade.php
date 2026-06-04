@@ -131,10 +131,30 @@
                                         <i class="material-icons me-1">add</i> Buat Draf Baru
                                     </a>
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('kepala-lab.reports.assets.pdf') }}" class="btn btn-outline-danger w-100" target="_blank">
+                                        <i class="material-icons me-1">picture_as_pdf</i> Cetak Laporan PDF
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('kepala-lab.reports.assets.excel') }}" class="btn btn-outline-success w-100" target="_blank">
+                                        <i class="material-icons me-1">table_view</i> Export Laporan Excel
+                                    </a>
+                                </div>
                                 @elseif(($user['role'] ?? '') === 'kaprodi')
                                 <div class="col-md-6 mb-3">
                                     <a href="{{ route('kaprodi.procurements.index') }}" class="btn bg-gradient-dark w-100">
                                         <i class="material-icons me-1">fact_check</i> Review Pengadaan
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('kaprodi.reports.assets.pdf') }}" class="btn btn-outline-danger w-100" target="_blank">
+                                        <i class="material-icons me-1">picture_as_pdf</i> Cetak Laporan PDF
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('kaprodi.reports.assets.excel') }}" class="btn btn-outline-success w-100" target="_blank">
+                                        <i class="material-icons me-1">table_view</i> Export Laporan Excel
                                     </a>
                                 </div>
                                 @elseif(($user['role'] ?? '') === 'staf_admin')
@@ -144,8 +164,13 @@
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="{{ route('staf-admin.assets.index') }}" class="btn bg-gradient-dark w-100">
-                                        <i class="material-icons me-1">inventory_2</i> Kelola Aset
+                                    <a href="{{ route('staf-admin.assets.index') }}" class="btn bg-gradient-info w-100">
+                                        <i class="material-icons me-1">category</i> Manajemen Aset
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('staf-admin.scanner.index') }}" class="btn btn-outline-primary w-100">
+                                        <i class="material-icons me-1">qr_code_scanner</i> Buka Scanner
                                     </a>
                                 </div>
                                 @elseif(($user['role'] ?? '') === 'staf_lab')
@@ -155,8 +180,13 @@
                                     </a>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <a href="{{ route('staf-lab.maintenance.index') }}" class="btn bg-gradient-dark w-100">
-                                        <i class="material-icons me-1">build</i> Log Pemeliharaan
+                                    <a href="{{ route('staf-lab.maintenance.index') }}" class="btn bg-gradient-warning w-100">
+                                        <i class="material-icons me-1">build</i> Pemeliharaan
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{{ route('staf-lab.scanner.index') }}" class="btn btn-outline-primary w-100">
+                                        <i class="material-icons me-1">qr_code_scanner</i> Buka Scanner
                                     </a>
                                 </div>
                                 @endif

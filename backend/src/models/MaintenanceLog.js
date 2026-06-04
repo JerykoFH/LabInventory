@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Catatan setiap kali ada pemeliharaan aset, diisi oleh Staf Lab
+// Catatan setiap kali staf lab melakukan pemeliharaan pada suatu aset
 const maintenanceLogSchema = new mongoose.Schema({
     // Ruangan yang di-maintain
     room: {
@@ -55,7 +55,7 @@ const maintenanceLogSchema = new mongoose.Schema({
         required: [true, 'Maintenance description is required'],
         trim: true,
     },
-    // BHP yang terpakai waktu maintenance berlangsung
+    // Daftar barang habis pakai yang terpakai selama pemeliharaan
     consumablesUsed: [
         {
             item: {

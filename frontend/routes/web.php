@@ -41,6 +41,10 @@ Route::prefix('kepala-lab')->name('kepala-lab.')->middleware(['api.auth', 'role:
     Route::post('procurements/{id}/items',                     [ProcurementController::class, 'addItem'])->name('procurements.items.add');
     Route::put('procurements/{id}/items/{itemId}',             [ProcurementController::class, 'updateItem'])->name('procurements.items.update');
     Route::delete('procurements/{id}/items/{itemId}',          [ProcurementController::class, 'removeItem'])->name('procurements.items.remove');
+
+    // Reports
+    Route::get('reports/assets/pdf',                           [\App\Http\Controllers\ReportController::class, 'exportAssetsPdf'])->name('reports.assets.pdf');
+    Route::get('reports/assets/excel',                         [\App\Http\Controllers\ReportController::class, 'exportAssetsExcel'])->name('reports.assets.excel');
 });
 
 // Ketua Program Studi (Kaprodi)
@@ -49,6 +53,10 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['api.auth', 'role:kaprod
     Route::get('procurements/{id}',                               [ProcurementReviewController::class, 'show'])->name('procurements.show');
     Route::patch('procurements/{id}/items/{itemId}/review',       [ProcurementReviewController::class, 'reviewItem'])->name('procurements.items.review');
     Route::post('procurements/{id}/finalize',                     [ProcurementReviewController::class, 'finalize'])->name('procurements.finalize');
+
+    // Reports
+    Route::get('reports/assets/pdf',                              [\App\Http\Controllers\ReportController::class, 'exportAssetsPdf'])->name('reports.assets.pdf');
+    Route::get('reports/assets/excel',                            [\App\Http\Controllers\ReportController::class, 'exportAssetsExcel'])->name('reports.assets.excel');
 });
 
 // Staf Administrasi
@@ -58,6 +66,9 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
+
+    // Scanner
+    Route::get('scanner',              [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
 });
 
 // Staf Laboratorium 
@@ -74,4 +85,7 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
     Route::get('maintenance/create',             [MaintenanceController::class, 'create'])->name('maintenance.create');
     Route::post('maintenance',                   [MaintenanceController::class, 'store'])->name('maintenance.store');
     Route::get('maintenance/{id}',               [MaintenanceController::class, 'show'])->name('maintenance.show');
+
+    // Scanner
+    Route::get('scanner',                        [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
 });

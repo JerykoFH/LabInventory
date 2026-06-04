@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-// Controller untuk staf administrasi — kelola label aset & penerimaan barang
+// Handle semua operasi inventory untuk staf admin: label aset dan pencatatan penerimaan barang
 class InventoryController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    // Tampilkan daftar pengadaan yang sudah final (status locked)
+    // Tampilkan daftar semua pengadaan yang sudah final (sudah dikunci oleh kaprodi)
     public function procurements()
     {
         $response = $this->api->get('/api/staf-admin/procurements');
@@ -20,7 +20,7 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.index', compact('drafts'));
     }
 
-    // Tampilkan detail satu pengadaan beserta item yang disetujui
+    // Tampilkan detail lengkap satu pengadaan beserta item-item yang sudah disetujui
     public function procurementDetail(string $id)
     {
         $response = $this->api->get("/api/staf-admin/procurements/{$id}");
@@ -51,7 +51,7 @@ class InventoryController extends Controller
         return view('staf_admin.assets.show', compact('asset'));
     }
 
-    // Simpan kode aset / label / QR yang diinput staf
+    // Simpan atau perbarui kode aset, foto label, atau QR code sesuai input staf
     public function updateLabel(Request $request, string $id)
     {
         $validated = $request->validate([

@@ -3,11 +3,11 @@ const MaintenanceLog = require('../models/MaintenanceLog');
 const Asset = require('../models/Asset');
 const Room = require('../models/Room');
 
-// ── Consumable Stock Management ──────────────────────────────────────────────
+// Mengelola stok barang habis pakai (BHP) — tambah, kurangi, lihat stok
 
 /**
  * GET /api/staf-lab/consumables
- * Lihat semua BHP beserta stok
+ * Ambil daftar semua barang habis pakai beserta stok terkini
  */
 const getAllConsumables = async (req, res) => {
     try {
@@ -20,11 +20,25 @@ const getAllConsumables = async (req, res) => {
 
 /**
  * POST /api/staf-lab/consumables
- * Tambah item BHP baru
+ * Daftarkan barang habis pakai baru
+ * Body: { name, category?, unit, currentStock?, minimumStock?, location?, notes? }
+ * Catatan: Stok dimulai dari 0 jika tidak ditentukan; minimumStock bersifat opsional
  */
 const createConsumable = async (req, res) => {
     try {
-        const item = await ConsumableItem.create(req.body);
+        const { name, unit, currentStock, minimumStock, ...rest } = req.body;
+        
+        if (!name || !unit) {
+            return res.status(400).json({ success: false, message: 'name and unit are required' });
+        }
+
+        const item = await ConsumableItem.create({
+            name,
+            unit,
+            currentStock: currentStock !== undefined ? currentStock : 0,
+            minimumStock: minimumStock !== undefined ? minimumStock : 5,
+            ...rest
+        });
         res.status(201).json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -33,10 +47,9 @@ const createConsumable = async (req, res) => {
 
 /**
  * PATCH /api/staf-lab/consumables/:id/stock
- * Update stok BHP (tambah/kurangi)
+ * Sesuaikan stok barang habis pakai (tambah atau kurangi)
  * Body: { adjustment: number, reason? }
- *   adjustment > 0 → tambah stok
- *   adjustment < 0 → kurangi stok
+ *   Nilai positif = menambah stok, Nilai negatif = mengurangi stok
  */
 const adjustStock = async (req, res) => {
     try {
@@ -93,7 +106,7 @@ const getAssetsByRoom = async (req, res) => {
 
 /**
  * GET /api/staf-lab/maintenance
- * Lihat semua log maintenance dengan ruangan dan aset yang di-maintain
+ * Ambil semua catatan pemeliharaan aset yang sudah dilakukan
  */
 const getAllMaintenanceLogs = async (req, res) => {
     try {
@@ -111,7 +124,7 @@ const getAllMaintenanceLogs = async (req, res) => {
 
 /**
  * POST /api/staf-lab/maintenance
- * Buat log maintenance baru + kurangi stok BHP yang digunakan
+ * Catat pemeliharaan aset baru (mendukung banyak aset) dan otomatis kurangi stok BHP yang dipakai
  */
 const createMaintenanceLog = async (req, res) => {
     try {
@@ -119,7 +132,7 @@ const createMaintenanceLog = async (req, res) => {
         let assets = [];
 
         if (req.body.data) {
-            // If sent as multipart with a 'data' JSON string
+            // Jika dikirim sebagai form-data multipart (karena ada file upload gambar)
             const parsed = JSON.parse(req.body.data);
             room = parsed.room;
             consumablesUsed = parsed.consumablesUsed;
@@ -129,12 +142,12 @@ const createMaintenanceLog = async (req, res) => {
             maintenanceDate = parsed.maintenanceDate;
             assets = parsed.assets || [];
         } else {
-            // Normal JSON request
+            // Request JSON normal
             ({ room, assets, consumablesUsed, type, description, notes, maintenanceDate } = req.body);
             assets = assets || [];
         }
 
-        // Validasi ruangan ada
+        // Pastikan ruangan (room) yang dimaksud benar-benar ada
         const roomDoc = await Room.findById(room);
         if (!roomDoc) return res.status(404).json({ success: false, message: 'Room not found' });
 
@@ -147,9 +160,8 @@ const createMaintenanceLog = async (req, res) => {
             }
         }
 
-        // Handle uploaded files mapping
+        // Handle uploaded files mapping (menautkan file foto ke aset yang sesuai)
         if (req.files && req.files.length > 0) {
-            // files can be named like "photoBefore_0", "photoAfter_0" where 0 is the index in assets array
             req.files.forEach(file => {
                 const match = file.fieldname.match(/^(photoBefore|photoAfter)_(\d+)$/);
                 if (match) {
@@ -157,13 +169,13 @@ const createMaintenanceLog = async (req, res) => {
                     const index = parseInt(match[2], 10);
                     if (assets[index]) {
                         // Store the URL path
-                        assets[index][ field === 'photoBefore' ? 'conditionPhotoBefore' : 'conditionPhotoAfter' ] = `/uploads/maintenance/${file.filename}`;
+                        assets[index][ field === 'photoBefore' ? 'photoBefore' : 'photoAfter' ] = `/uploads/maintenance/${file.filename}`;
                     }
                 }
             });
         }
 
-        // Kurangi stok BHP yang digunakan
+        // Proses pengurangan stok untuk setiap BHP yang digunakan
         if (consumablesUsed && consumablesUsed.length > 0) {
             for (const usage of consumablesUsed) {
                 const consumable = await ConsumableItem.findById(usage.item);
@@ -181,13 +193,14 @@ const createMaintenanceLog = async (req, res) => {
             }
         }
 
-        // Update kondisi aset
+        // Perbarui kondisi masing-masing barang setelah pemeliharaan
         if (assets.length > 0) {
             for (const assetObj of assets) {
                 if (assetObj.conditionAfter) {
                     const assetDoc = await Asset.findById(assetObj.asset);
                     if (assetDoc) {
                         assetDoc.condition = assetObj.conditionAfter;
+                        // Jika barangnya rusak berat atau tidak bisa diperbaiki, tandai sebagai tidak aktif
                         if (assetObj.conditionAfter === 'tidak_aktif') assetDoc.status = 'tidak_aktif';
                         await assetDoc.save();
                     }
@@ -220,7 +233,7 @@ const createMaintenanceLog = async (req, res) => {
 
 /**
  * GET /api/staf-lab/maintenance/:id
- * Detail satu log maintenance dengan semua informasi ruangan, aset, dan consumable
+ * Lihat detail lengkap satu catatan pemeliharaan
  */
 const getMaintenanceLogById = async (req, res) => {
     try {

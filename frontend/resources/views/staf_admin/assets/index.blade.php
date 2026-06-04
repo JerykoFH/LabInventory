@@ -256,7 +256,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
                                             </td>
                                         </tr>
                                         @empty
@@ -281,7 +280,6 @@
 
     @push('js')
     <script>
-
         document.getElementById('searchAsset').addEventListener('input', function() {
             const query = this.value.toLowerCase();
             document.querySelectorAll('.asset-row').forEach(function(row) {

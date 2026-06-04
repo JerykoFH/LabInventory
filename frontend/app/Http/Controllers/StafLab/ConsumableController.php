@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
 
-// Controller staf lab — kelola stok barang habis pakai (BHP)
+// Kelola stok barang habis pakai (BHP) untuk keperluan laboratorium
 class ConsumableController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    // Tampilkan semua item BHP beserta stok saat ini
+    // Tampilkan semua item barang habis pakai beserta stok terkini
     public function index()
     {
         $response = $this->api->get('/api/staf-lab/consumables');
@@ -20,20 +20,20 @@ class ConsumableController extends Controller
         return view('staf_lab.consumables.index', compact('items'));
     }
 
-    // Tampilkan form tambah item BHP
+    // Tampilkan form untuk menambah item barang habis pakai baru
     public function create()
     {
         return view('staf_lab.consumables.create');
     }
 
-    // Simpan item BHP baru ke database
+    // Daftarkan item barang habis pakai baru ke database
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'         => 'required|string|max:200',
             'category'     => 'nullable|string|max:100',
             'unit'         => 'required|string|max:50',
-            'currentStock' => 'required|integer|min:0',
+            'currentStock' => 'nullable|integer|min:0',
             'minimumStock' => 'nullable|integer|min:0',
             'location'     => 'nullable|string|max:200',
             'notes'        => 'nullable|string',
@@ -49,7 +49,8 @@ class ConsumableController extends Controller
         return back()->withErrors($response->json('message'))->withInput();
     }
 
-    // Tambah atau kurangi stok BHP (adjustment positif = tambah, negatif = kurangi)
+    // Sesuaikan stok barang habis pakai (bisa menambah atau mengurangi)
+    // Gunakan nilai positif untuk menambah, negatif untuk mengurangi
     public function adjustStock(Request $request, string $id)
     {
         $validated = $request->validate([
