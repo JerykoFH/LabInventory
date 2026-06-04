@@ -6,6 +6,7 @@ const {
     getAllMaintenanceLogs, createMaintenanceLog, getMaintenanceLogById,
 } = require('../controllers/labController');
 const { getAllAssets, getAssetByCode, createAsset } = require('../controllers/inventoryController');
+const { getAllRooms } = require('../controllers/roomController');
 
 router.use(protect, authorize('staf_lab'));
 
@@ -18,6 +19,9 @@ router.post('/assets', createAsset);
 router.get('/consumables', getAllConsumables);
 router.post('/consumables', createConsumable);
 router.patch('/consumables/:id/stock', adjustStock);
+
+// Rooms (untuk dropdown di form maintenance)
+router.get('/rooms', getAllRooms);
 
 // Maintenance
 router.get('/maintenance', getAllMaintenanceLogs);
