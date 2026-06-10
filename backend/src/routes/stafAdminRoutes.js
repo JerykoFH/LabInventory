@@ -10,7 +10,8 @@ const {
     setReceivedDate,
     getAssetByCode,
     createAsset,
-    setProcurementProgress
+    setProcurementProgress,
+    receiveProcurementItem
 } = require('../controllers/inventoryController');
 
 router.use(protect, authorize('staf_admin'));
@@ -18,6 +19,7 @@ router.use(protect, authorize('staf_admin'));
 router.get('/procurements', getLockedDrafts);
 router.get('/procurements/:id', getLockedDraftDetail);
 router.patch('/procurements/:id/progress', setProcurementProgress);
+router.patch('/procurements/:id/items/:itemId/receive', receiveProcurementItem);
 router.get('/assets', getAllAssets);
 router.get('/assets/scan/:code', getAssetByCode);
 router.get('/assets/:id', getAssetById);

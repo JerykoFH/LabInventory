@@ -11,6 +11,7 @@ const kaprodiRoutes    = require('./src/routes/kaprodiRoutes');
 const stafAdminRoutes  = require('./src/routes/stafAdminRoutes');
 const stafLabRoutes    = require('./src/routes/stafLabRoutes');
 const dashboardRoutes  = require('./src/routes/dashboardRoutes');
+const globalRoutes     = require('./src/routes/globalRoutes');
 
 // Koneksi MongoDB
 connectDB();
@@ -31,6 +32,7 @@ app.use('/api/kaprodi',    kaprodiRoutes);
 app.use('/api/staf-admin', stafAdminRoutes);
 app.use('/api/staf-lab',   stafLabRoutes);
 app.use('/api/dashboard',  dashboardRoutes);
+app.use('/api/global',     globalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

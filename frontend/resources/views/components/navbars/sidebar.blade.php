@@ -19,7 +19,6 @@
     <div class="collapse navbar-collapse w-auto max-height-vh-100" id="sidenav-collapse-main">
         <ul class="navbar-nav">
 
-            {{-- Dashboard --}}
             <li class="nav-item">
                 <a class="nav-link text-white {{ $activePage == 'dashboard' ? 'active bg-gradient-primary' : '' }}"
                     href="{{ url('/dashboard') }}">
@@ -30,7 +29,36 @@
                 </a>
             </li>
 
-            {{-- ══════ ADMIN ══════ --}}
+            @if($role !== 'admin')
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $activePage == 'global-assets' ? 'active bg-gradient-primary' : '' }}"
+                    href="{{ route('global.assets.index') }}">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="material-icons opacity-10">inventory_2</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Inventaris</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $activePage == 'global-consumables' ? 'active bg-gradient-primary' : '' }}"
+                    href="{{ route('global.consumables.index') }}">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="material-icons opacity-10">science</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Barang Habis Pakai</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white {{ $activePage == 'global-rooms' ? 'active bg-gradient-primary' : '' }}"
+                    href="{{ route('global.rooms.index') }}">
+                    <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="material-icons opacity-10">meeting_room</i>
+                    </div>
+                    <span class="nav-link-text ms-1">Ruangan</span>
+                </a>
+            </li>
+            @endif
+
             @if($role === 'admin')
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Administrator</h6>
@@ -55,7 +83,6 @@
             </li>
             @endif
 
-            {{-- ══════ KEPALA LAB ══════ --}}
             @if($role === 'kepala_lab')
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Kepala Lab</h6>
@@ -71,7 +98,6 @@
             </li>
             @endif
 
-            {{-- ══════ KAPRODI ══════ --}}
             @if($role === 'kaprodi')
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Kaprodi</h6>
@@ -87,7 +113,6 @@
             </li>
             @endif
 
-            {{-- ══════ STAF ADMIN ══════ --}}
             @if($role === 'staf_admin')
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Staf Administrasi</h6>
@@ -112,7 +137,6 @@
             </li>
             @endif
 
-            {{-- ══════ STAF LAB ══════ --}}
             @if($role === 'staf_lab')
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">Staf Laboratorium</h6>
@@ -140,7 +164,6 @@
         </ul>
     </div>
 
-    {{-- Logout button --}}
     <div class="sidenav-footer position-absolute w-100 bottom-0">
         <div class="mx-3 mb-3">
             <form method="POST" action="{{ route('logout') }}">

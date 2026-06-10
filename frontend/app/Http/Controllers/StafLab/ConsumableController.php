@@ -48,6 +48,6 @@ class ConsumableController extends Controller
                 ->with('success', 'Stok berhasil diperbarui.');
         }
 
-        return back()->withErrors($response->json('message'));
+        return back()->with('error', $response->json('message') ?? 'Gagal memperbarui stok.');
     }
 }

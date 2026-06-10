@@ -191,10 +191,10 @@
                                             <td class="align-middle text-center">
                                                 @if($isSubmitted)
                                                     <button type="button" class="btn btn-sm btn-outline-success mb-0 px-2 py-1 me-1" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item['_id'] }}" onclick="setReviewMode('{{ $item['_id'] }}', 'approved')">
-                                                        <i class="material-icons text-sm">thumb_up</i>
+                                                        <i class="material-icons text-sm">check</i>
                                                     </button>
                                                     <button type="button" class="btn btn-sm btn-outline-danger mb-0 px-2 py-1" data-bs-toggle="modal" data-bs-target="#reviewModal{{ $item['_id'] }}" onclick="setReviewMode('{{ $item['_id'] }}', 'rejected')">
-                                                        <i class="material-icons text-sm">thumb_down</i>
+                                                        <i class="material-icons text-sm">close</i>
                                                     </button>
                                                     
                                                     <!-- Review Modal -->

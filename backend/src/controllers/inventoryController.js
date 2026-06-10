@@ -171,6 +171,50 @@ const setProcurementProgress = async (req, res) => {
     }
 };
 
+const receiveProcurementItem = async (req, res) => {
+    try {
+        const { receivedQuantity } = req.body;
+        if (receivedQuantity === undefined || receivedQuantity < 0) {
+            return res.status(400).json({ success: false, message: 'Invalid received quantity' });
+        }
+
+        const draft = await ProcurementDraft.findOne({ _id: req.params.id, status: 'in_progress' });
+        if (!draft) {
+            return res.status(404).json({ success: false, message: 'Draft not found or not in progress' });
+        }
+
+        const item = await ProcurementItem.findOne({ _id: req.params.itemId, draft: draft._id });
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Item not found' });
+        }
+
+        if (receivedQuantity > item.quantity) {
+            return res.status(400).json({ success: false, message: 'Received quantity cannot exceed ordered quantity' });
+        }
+
+        item.receivedQuantity = receivedQuantity;
+        await item.save();
+
+        const allItems = await ProcurementItem.find({ draft: draft._id, approvalStatus: 'approved' });
+        let allReceived = true;
+        for (const i of allItems) {
+            if ((i.receivedQuantity || 0) < i.quantity) {
+                allReceived = false;
+                break;
+            }
+        }
+
+        if (allReceived && allItems.length > 0) {
+            draft.status = 'completed';
+            await draft.save();
+        }
+
+        res.json({ success: true, data: { item, draftStatus: draft.status } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = { 
     getLockedDrafts, 
     getLockedDraftDetail, 
@@ -180,5 +224,6 @@ module.exports = {
     setReceivedDate,
     getAssetByCode,
     createAsset,
-    setProcurementProgress
+    setProcurementProgress,
+    receiveProcurementItem
 };

@@ -23,7 +23,7 @@ const procurementDraftSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['draft', 'submitted', 'locked', 'in_progress'],
+        enum: ['draft', 'submitted', 'locked', 'in_progress', 'completed'],
         default: 'draft',
     },
     submittedAt: {

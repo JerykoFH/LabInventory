@@ -10,6 +10,7 @@ use App\Http\Controllers\Kaprodi\ProcurementReviewController;
 use App\Http\Controllers\StafAdmin\InventoryController;
 use App\Http\Controllers\StafLab\ConsumableController;
 use App\Http\Controllers\StafLab\MaintenanceController;
+use App\Http\Controllers\GlobalViewController;
 
 // Public Routes
 Route::get('/',       fn () => redirect()->route('login'));
@@ -64,6 +65,7 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('procurements',         [InventoryController::class, 'procurements'])->name('procurements.index');
     Route::get('procurements/{id}',    [InventoryController::class, 'procurementDetail'])->name('procurements.show');
     Route::patch('procurements/{id}/progress', [InventoryController::class, 'setProgress'])->name('procurements.progress');
+    Route::patch('procurements/{id}/items/{itemId}/receive', [InventoryController::class, 'receiveItem'])->name('procurements.items.receive');
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
@@ -90,4 +92,12 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
 
     // Scanner
     Route::get('scanner',                        [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
+});
+
+// Global Views (semua role kecuali admin — read-only)
+Route::prefix('global')->name('global.')->middleware(['api.auth', 'role:kepala_lab,kaprodi,staf_admin,staf_lab'])->group(function () {
+    Route::get('assets',          [GlobalViewController::class, 'assets'])->name('assets.index');
+    Route::get('consumables',     [GlobalViewController::class, 'consumables'])->name('consumables.index');
+    Route::get('rooms',           [GlobalViewController::class, 'rooms'])->name('rooms.index');
+    Route::get('rooms/{id}',      [GlobalViewController::class, 'roomAssets'])->name('rooms.show');
 });

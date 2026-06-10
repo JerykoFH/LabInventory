@@ -29,6 +29,40 @@ class InventoryController extends Controller
         return view('staf_admin.procurements.show', compact('draft'));
     }
 
+    // Ubah status pengadaan dari locked menjadi in_progress (sedang diproses)
+    public function setProgress(Request $request, string $id)
+    {
+        $response = $this->api->patch("/api/staf-admin/procurements/{$id}/progress");
+
+        if ($response->successful()) {
+            return redirect()->route('staf-admin.procurements.index')
+                             ->with('success', 'Status pengadaan berhasil diubah menjadi Sedang Diproses.');
+        }
+
+        return back()->with('error', $response->json('message') ?? 'Gagal mengubah status pengadaan.');
+    }
+
+    // Memproses penerimaan barang secara parsial per item
+    public function receiveItem(Request $request, string $id, string $itemId)
+    {
+        $validated = $request->validate([
+            'receivedQuantity' => 'required|numeric|min:0',
+        ]);
+
+        $response = $this->api->patch("/api/staf-admin/procurements/{$id}/items/{$itemId}/receive", $validated);
+
+        if ($response->successful()) {
+            $data = $response->json('data');
+            $message = 'Jumlah penerimaan item berhasil diperbarui.';
+            if (isset($data['draftStatus']) && $data['draftStatus'] === 'completed') {
+                $message .= ' Semua item telah diterima, status pengadaan Selesai.';
+            }
+            return back()->with('success', $message);
+        }
+
+        return back()->with('error', $response->json('message') ?? 'Gagal memperbarui jumlah penerimaan.');
+    }
+
     // Tampilkan semua aset inventaris laboratorium dengan filter penerimaan
     public function assets()
     {

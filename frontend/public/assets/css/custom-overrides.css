@@ -1,0 +1,67 @@
+.input-group.input-group-outline.is-focused .form-label + .form-control {
+    border-color: #1A73E8 !important;
+    box-shadow: inset 1px 0 #1A73E8, inset -1px 0 #1A73E8, inset 0 -1px #1A73E8;
+}
+
+.input-group.input-group-outline.is-focused .form-label {
+    color: #1A73E8 !important;
+}
+
+.input-group.input-group-outline.is-focused .form-label:before,
+.input-group.input-group-outline.is-focused .form-label:after {
+    border-top-color: #1A73E8 !important;
+    box-shadow: inset 0 1px #1A73E8;
+}
+
+.input-group.input-group-outline.is-filled:not(.is-focused) .form-label + .form-control {
+    border-color: #d2d2d2 !important;
+    box-shadow: inset 1px 0 #d2d2d2, inset -1px 0 #d2d2d2, inset 0 -1px #d2d2d2;
+}
+
+.input-group.input-group-outline.is-filled:not(.is-focused) .form-label {
+    color: #7b809a !important;
+}
+
+.input-group.input-group-outline.is-filled:not(.is-focused) .form-label:before,
+.input-group.input-group-outline.is-filled:not(.is-focused) .form-label:after {
+    border-top-color: #d2d2d2 !important;
+    box-shadow: inset 0 1px #d2d2d2;
+}
+
+.input-group.input-group-dynamic .form-control,
+.input-group.input-group-dynamic .form-control:focus,
+.input-group.input-group-static .form-control,
+.input-group.input-group-static .form-control:focus {
+    background-image: linear-gradient(0deg, #1A73E8 2px, rgba(26, 115, 232, 0) 0), linear-gradient(0deg, #d2d2d2 1px, rgba(209, 209, 209, 0) 0) !important;
+}
+
+.input-group.input-group-dynamic.is-focused label,
+.input-group.input-group-static.is-focused label {
+    color: #1A73E8;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked {
+    background: #1A73E8;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="checkbox"]:checked,
+.form-check:not(.form-switch) .form-check-input[type="radio"]:checked {
+    border-color: #1A73E8;
+}
+
+.form-check:not(.form-switch) .form-check-input[type="radio"]:after {
+    background-image: linear-gradient(195deg, #49a3f1 0%, #1A73E8 100%), var(--bs-gradient);
+}
+
+
+.input-group.input-group-static select.form-control {
+    appearance: auto !important;
+    -webkit-appearance: auto !important;
+    -moz-appearance: auto !important;
+    padding-right: 2rem;
+    cursor: pointer;
+    border-bottom: 1px solid #d2d2d2;
+}
+.input-group.input-group-static select.form-control:focus {
+    border-bottom: 1px solid #1A73E8;
+}

@@ -63,7 +63,7 @@ const adjustStock = async (req, res) => {
 
         const newStock = item.currentStock + Number(adjustment);
         if (newStock < 0) {
-            return res.status(400).json({ success: false, message: 'Insufficient stock' });
+            return res.status(400).json({ success: false, message: 'Stok tidak mencukupi untuk pengurangan ini' });
         }
 
         item.currentStock = newStock;
@@ -74,7 +74,7 @@ const adjustStock = async (req, res) => {
     }
 };
 
-// ── Room Management ─────────────────────────────────────────────────────────
+// Room Management
 
 /**
  * GET /api/staf-lab/rooms
@@ -102,7 +102,7 @@ const getAssetsByRoom = async (req, res) => {
     }
 };
 
-// ── Maintenance Log ──────────────────────────────────────────────────────────
+// Maintenance Log 
 
 /**
  * GET /api/staf-lab/maintenance
