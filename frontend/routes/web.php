@@ -10,6 +10,7 @@ use App\Http\Controllers\Kaprodi\ProcurementReviewController;
 use App\Http\Controllers\StafAdmin\InventoryController;
 use App\Http\Controllers\StafLab\ConsumableController;
 use App\Http\Controllers\StafLab\MaintenanceController;
+use App\Http\Controllers\GlobalViewController;
 
 // Public Routes
 Route::get('/',       fn () => redirect()->route('login'));
@@ -90,4 +91,12 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
 
     // Scanner
     Route::get('scanner',                        [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
+});
+
+// Global Views (semua role kecuali admin — read-only)
+Route::prefix('global')->name('global.')->middleware(['api.auth', 'role:kepala_lab,kaprodi,staf_admin,staf_lab'])->group(function () {
+    Route::get('assets',          [GlobalViewController::class, 'assets'])->name('assets.index');
+    Route::get('consumables',     [GlobalViewController::class, 'consumables'])->name('consumables.index');
+    Route::get('rooms',           [GlobalViewController::class, 'rooms'])->name('rooms.index');
+    Route::get('rooms/{id}',      [GlobalViewController::class, 'roomAssets'])->name('rooms.show');
 });
