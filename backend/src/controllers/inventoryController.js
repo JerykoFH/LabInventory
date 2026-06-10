@@ -8,7 +8,7 @@ const ProcurementItem = require('../models/ProcurementItem');
  */
 const getLockedDrafts = async (req, res) => {
     try {
-        const drafts = await ProcurementDraft.find({ status: 'locked' })
+        const drafts = await ProcurementDraft.find({ status: { $in: ['locked', 'in_progress'] } })
             .populate('createdBy', 'name email')
             .populate('reviewedBy', 'name email')
             .sort({ lockedAt: -1 });
@@ -24,7 +24,7 @@ const getLockedDrafts = async (req, res) => {
  */
 const getLockedDraftDetail = async (req, res) => {
     try {
-        const draft = await ProcurementDraft.findOne({ _id: req.params.id, status: 'locked' })
+        const draft = await ProcurementDraft.findOne({ _id: req.params.id, status: { $in: ['locked', 'in_progress'] } })
             .populate('createdBy', 'name email').populate('reviewedBy', 'name email');
         if (!draft) return res.status(404).json({ success: false, message: 'Locked draft not found' });
 
@@ -100,16 +100,24 @@ const updateAssetLabel = async (req, res) => {
     }
 };
 
-/**
- * PATCH /api/staf-admin/assets/:id/receive
- * DEPRECATED: Fitur ini sudah tidak digunakan
- * Tanggal penerimaan diatur otomatis oleh sistem saat barang masuk dari procurement
- */
 const setReceivedDate = async (req, res) => {
-    return res.status(403).json({ 
-        success: false, 
-        message: 'Operasi tidak diizinkan. Tanggal penerimaan diatur otomatis oleh sistem.' 
-    });
+    try {
+        const { receivedDate } = req.body;
+        if (!receivedDate) {
+            return res.status(400).json({ success: false, message: 'Tanggal penerimaan wajib diisi' });
+        }
+        
+        const asset = await Asset.findByIdAndUpdate(
+            req.params.id,
+            { receivedDate },
+            { new: true, runValidators: true }
+        );
+        
+        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        res.json({ success: true, data: asset });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 /**
@@ -149,6 +157,20 @@ const createAsset = async (req, res) => {
     }
 };
 
+const setProcurementProgress = async (req, res) => {
+    try {
+        const draft = await ProcurementDraft.findOneAndUpdate(
+            { _id: req.params.id, status: 'locked' },
+            { status: 'in_progress' },
+            { new: true }
+        );
+        if (!draft) return res.status(404).json({ success: false, message: 'Draft not found or not locked' });
+        res.json({ success: true, data: draft });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = { 
     getLockedDrafts, 
     getLockedDraftDetail, 
@@ -157,5 +179,6 @@ module.exports = {
     updateAssetLabel, 
     setReceivedDate,
     getAssetByCode,
-    createAsset
+    createAsset,
+    setProcurementProgress
 };

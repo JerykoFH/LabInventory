@@ -23,30 +23,13 @@ class ConsumableController extends Controller
     // Tampilkan form untuk menambah item barang habis pakai baru
     public function create()
     {
-        return view('staf_lab.consumables.create');
+        abort(403, 'Hanya Administrator yang dapat menambah item BHP baru.');
     }
 
     // Daftarkan item barang habis pakai baru ke database
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'         => 'required|string|max:200',
-            'category'     => 'nullable|string|max:100',
-            'unit'         => 'required|string|max:50',
-            'currentStock' => 'nullable|integer|min:0',
-            'minimumStock' => 'nullable|integer|min:0',
-            'location'     => 'nullable|string|max:200',
-            'notes'        => 'nullable|string',
-        ]);
-
-        $response = $this->api->post('/api/staf-lab/consumables', $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('staf-lab.consumables.index')
-                ->with('success', 'Item BHP berhasil ditambahkan.');
-        }
-
-        return back()->withErrors($response->json('message'))->withInput();
+        abort(403, 'Hanya Administrator yang dapat menambah item BHP baru.');
     }
 
     // Sesuaikan stok barang habis pakai (bisa menambah atau mengurangi)

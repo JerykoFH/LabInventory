@@ -63,9 +63,11 @@ Route::prefix('kaprodi')->name('kaprodi.')->middleware(['api.auth', 'role:kaprod
 Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:staf_admin'])->group(function () {
     Route::get('procurements',         [InventoryController::class, 'procurements'])->name('procurements.index');
     Route::get('procurements/{id}',    [InventoryController::class, 'procurementDetail'])->name('procurements.show');
+    Route::patch('procurements/{id}/progress', [InventoryController::class, 'setProgress'])->name('procurements.progress');
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
+    Route::patch('assets/{id}/receive', [InventoryController::class, 'updateReceivedDate'])->name('assets.receive');
 
     // Scanner
     Route::get('scanner',              [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');

@@ -82,9 +82,6 @@
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
                                 <h6 class="text-white text-capitalize ps-3 mb-0">Daftar Barang Habis Pakai</h6>
-                                <a href="{{ route('staf-lab.consumables.create') }}" class="btn btn-sm btn-white mb-0">
-                                    <i class="material-icons text-sm me-1">add</i> Tambah Item
-                                </a>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
@@ -184,10 +181,7 @@
                                         <tr>
                                             <td colspan="6" class="text-center py-5">
                                                 <i class="material-icons text-secondary" style="font-size: 48px;">science</i>
-                                                <p class="text-secondary text-sm mb-0 mt-2">Belum ada item BHP. Tambah sekarang!</p>
-                                                <a href="{{ route('staf-lab.consumables.create') }}" class="btn bg-gradient-info btn-sm mt-3">
-                                                    <i class="material-icons text-sm me-1">add</i> Tambah Item BHP
-                                                </a>
+                                                <p class="text-secondary text-sm mb-0 mt-2">Belum ada item BHP.</p>
                                             </td>
                                         </tr>
                                         @endforelse

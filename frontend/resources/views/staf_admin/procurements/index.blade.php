@@ -86,6 +86,17 @@
                                                 <a href="{{ route('staf-admin.procurements.show', $draft['_id']) }}" class="btn btn-sm btn-outline-primary mb-0" title="Detail Penerimaan">
                                                     <i class="material-icons text-sm me-1">visibility</i> Lihat Detail
                                                 </a>
+                                                @if(isset($draft['status']) && $draft['status'] === 'locked')
+                                                <form action="{{ route('staf-admin.procurements.progress', $draft['_id']) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-sm btn-success mb-0 ms-1" title="Tandai Sedang Diproses" onclick="return confirm('Mulai proses penerimaan untuk draf ini?')">
+                                                        <i class="material-icons text-sm me-1">play_circle</i> Proses
+                                                    </button>
+                                                </form>
+                                                @elseif(isset($draft['status']) && $draft['status'] === 'in_progress')
+                                                <span class="badge bg-gradient-success ms-1">Sedang Diproses</span>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty

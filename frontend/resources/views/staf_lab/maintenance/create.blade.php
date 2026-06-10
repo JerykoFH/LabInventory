@@ -44,8 +44,8 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="input-group input-group-outline my-3 is-filled">
-                                            <label class="form-label">Tanggal Pemeliharaan <span class="text-danger">*</span></label>
-                                            <input type="date" name="maintenanceDate" class="form-control" value="{{ old('maintenanceDate', date('Y-m-d')) }}" required>
+                                            <label class="form-label">Waktu Pemeliharaan <span class="text-danger">*</span></label>
+                                            <input type="datetime-local" name="maintenanceDate" class="form-control" value="{{ old('maintenanceDate', date('Y-m-d\TH:i')) }}" required>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -91,9 +91,9 @@
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <div class="input-group input-group-static">
-                                                        <label class="ms-0">Kondisi Sebelum</label>
-                                                        <select name="assets[{{ $i }}][conditionBefore]" class="form-control">
-                                                            <option value="">-- Tidak dicatat --</option>
+                                                        <label class="ms-0">Kondisi Sebelum <span class="text-danger">*</span></label>
+                                                        <select name="assets[{{ $i }}][conditionBefore]" class="form-control" required>
+                                                            <option value="">-- Pilih Kondisi --</option>
                                                             <option value="baik" {{ ($assetData['conditionBefore'] ?? '') == 'baik' ? 'selected' : '' }}>Baik</option>
                                                             <option value="rusak_ringan" {{ ($assetData['conditionBefore'] ?? '') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
                                                             <option value="rusak_berat" {{ ($assetData['conditionBefore'] ?? '') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
@@ -102,9 +102,9 @@
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <div class="input-group input-group-static">
-                                                        <label class="ms-0">Kondisi Sesudah</label>
-                                                        <select name="assets[{{ $i }}][conditionAfter]" class="form-control">
-                                                            <option value="">-- Tidak dicatat --</option>
+                                                        <label class="ms-0">Kondisi Sesudah <span class="text-danger">*</span></label>
+                                                        <select name="assets[{{ $i }}][conditionAfter]" class="form-control" required>
+                                                            <option value="">-- Pilih Kondisi --</option>
                                                             <option value="baik" {{ ($assetData['conditionAfter'] ?? '') == 'baik' ? 'selected' : '' }}>Baik</option>
                                                             <option value="rusak_ringan" {{ ($assetData['conditionAfter'] ?? '') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
                                                             <option value="rusak_berat" {{ ($assetData['conditionAfter'] ?? '') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
@@ -273,9 +273,9 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="input-group input-group-static">
-                                <label class="ms-0">Kondisi Sebelum</label>
-                                <select name="assets[${index}][conditionBefore]" class="form-control">
-                                    <option value="">-- Tidak dicatat --</option>
+                                <label class="ms-0">Kondisi Sebelum <span class="text-danger">*</span></label>
+                                <select name="assets[${index}][conditionBefore]" class="form-control" required>
+                                    <option value="">-- Pilih Kondisi --</option>
                                     <option value="baik">Baik</option>
                                     <option value="rusak_ringan">Rusak Ringan</option>
                                     <option value="rusak_berat">Rusak Berat</option>
@@ -284,9 +284,9 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="input-group input-group-static">
-                                <label class="ms-0">Kondisi Sesudah</label>
-                                <select name="assets[${index}][conditionAfter]" class="form-control">
-                                    <option value="">-- Tidak dicatat --</option>
+                                <label class="ms-0">Kondisi Sesudah <span class="text-danger">*</span></label>
+                                <select name="assets[${index}][conditionAfter]" class="form-control" required>
+                                    <option value="">-- Pilih Kondisi --</option>
                                     <option value="baik">Baik</option>
                                     <option value="rusak_ringan">Rusak Ringan</option>
                                     <option value="rusak_berat">Rusak Berat</option>

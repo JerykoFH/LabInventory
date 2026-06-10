@@ -256,6 +256,45 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
+                                                {{-- Set Tgl Penerimaan --}}
+                                                <button type="button"
+                                                    class="btn btn-link text-success text-xs p-0 mb-0"
+                                                    title="Set Tanggal Diterima"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#receiveModal{{ $asset['_id'] }}">
+                                                    <i class="material-icons text-sm">event_available</i>
+                                                </button>
+
+                                                {{-- Modal Receive --}}
+                                                <div class="modal fade" id="receiveModal{{ $asset['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content text-start">
+                                                            <form action="{{ route('staf-admin.assets.receive', $asset['_id']) }}" method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title font-weight-normal">Update Tanggal Diterima</h5>
+                                                                    <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
+                                                                    <div class="input-group input-group-outline my-3 is-filled">
+                                                                        <label class="form-label">Tanggal Penerimaan <span class="text-danger">*</span></label>
+                                                                        <input type="date" name="receivedDate" class="form-control"
+                                                                            value="{{ $asset['receivedDate'] ?? false ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '' }}" required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                    <button type="submit" class="btn bg-gradient-success">Simpan Tanggal</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         @empty

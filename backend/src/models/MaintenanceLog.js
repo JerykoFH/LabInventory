@@ -18,11 +18,13 @@ const maintenanceLogSchema = new mongoose.Schema({
             },
             conditionBefore: {
                 type: String,
-                enum: ['baik', 'rusak_ringan', 'rusak_berat', ''],
+                enum: ['baik', 'rusak_ringan', 'rusak_berat'],
+                required: true,
             },
             conditionAfter: {
                 type: String,
-                enum: ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif', ''],
+                enum: ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif'],
+                required: true,
             },
             // Foto kondisi sebelum dan sesudah maintenance
             conditionPhotoBefore: {

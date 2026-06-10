@@ -28,3 +28,4 @@ frontend/public/hot
 # OS
 .DS_Store
 Thumbs.db
+ROUTING.md
