@@ -65,6 +65,7 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('procurements',         [InventoryController::class, 'procurements'])->name('procurements.index');
     Route::get('procurements/{id}',    [InventoryController::class, 'procurementDetail'])->name('procurements.show');
     Route::patch('procurements/{id}/progress', [InventoryController::class, 'setProgress'])->name('procurements.progress');
+    Route::patch('procurements/{id}/items/{itemId}/receive', [InventoryController::class, 'receiveItem'])->name('procurements.items.receive');
     Route::get('assets',               [InventoryController::class, 'assets'])->name('assets.index');
     Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');

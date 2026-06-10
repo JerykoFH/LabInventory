@@ -26,6 +26,11 @@ const procurementItemSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    receivedQuantity: {
+        type: Number,
+        default: 0,
+        min: [0, 'Received quantity cannot be negative'],
+    },
     estimatedPrice: {
         type: Number,
         required: true,

@@ -88,10 +88,10 @@
                                         <tr>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Barang</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Tipe</th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jumlah</th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Harga Satuan</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Dipesan</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Diterima</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Subtotal</th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl. Diterima</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
                                             <th class="text-center text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
@@ -122,24 +122,63 @@
                                                 <span class="text-secondary text-sm font-weight-bold">{{ $item['quantity'] }} {{ $item['unit'] ?? '' }}</span>
                                             </td>
                                             <td class="align-middle text-center">
-                                                <span class="text-secondary text-xs">Rp {{ number_format($item['estimatedPrice'] ?? 0, 0, ',', '.') }}</span>
+                                                <span class="text-info text-sm font-weight-bold">{{ $item['receivedQuantity'] ?? 0 }} {{ $item['unit'] ?? '' }}</span>
                                             </td>
                                             <td class="align-middle text-center">
                                                 <span class="text-dark text-xs font-weight-bold">Rp {{ number_format(($item['estimatedPrice'] ?? 0) * ($item['quantity'] ?? 1), 0, ',', '.') }}</span>
                                             </td>
                                             <td class="align-middle text-center">
-                                                @if($item['itemType'] === 'asset' && ($item['asset']['receivedDate'] ?? false))
-                                                    <span class="badge bg-gradient-success text-xs">
-                                                        {{ \Carbon\Carbon::parse($item['asset']['receivedDate'])->format('d M Y') }}
-                                                    </span>
-                                                @elseif($item['itemType'] === 'asset')
-                                                    <span class="badge bg-gradient-warning text-xs">Belum diterima</span>
+                                                @php
+                                                    $qty = $item['quantity'] ?? 1;
+                                                    $rcv = $item['receivedQuantity'] ?? 0;
+                                                @endphp
+                                                @if($rcv >= $qty)
+                                                    <span class="badge bg-gradient-success text-xs">Lengkap</span>
+                                                @elseif($rcv > 0)
+                                                    <span class="badge bg-gradient-warning text-xs">Parsial</span>
                                                 @else
-                                                    <span class="text-xs text-secondary">-</span>
+                                                    <span class="badge bg-gradient-secondary text-xs">Belum Ada</span>
                                                 @endif
                                             </td>
                                             <td class="align-middle text-center">
-                                                <span class="text-xs text-secondary">-</span>
+                                                @if(isset($draft['status']) && $draft['status'] === 'in_progress' && ($item['receivedQuantity'] ?? 0) < ($item['quantity'] ?? 1))
+                                                <button type="button" class="btn btn-sm btn-outline-info mb-0" data-bs-toggle="modal" data-bs-target="#receiveModal{{ $item['_id'] }}">
+                                                    Terima Barang
+                                                </button>
+                                                <!-- Modal Terima -->
+                                                <div class="modal fade" id="receiveModal{{ $item['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content text-start">
+                                                            <form action="{{ route('staf-admin.procurements.items.receive', ['id' => $draft['_id'], 'itemId' => $item['_id']]) }}" method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title font-weight-normal">Update Penerimaan: {{ $item['name'] }}</h5>
+                                                                    <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-sm mb-3 text-wrap">Masukkan total jumlah <strong>{{ $item['name'] }}</strong> yang sudah tiba sejauh ini.</p>
+                                                                    <div class="input-group input-group-outline my-3 is-filled">
+                                                                        <label class="form-label">Total Diterima</label>
+                                                                        <input type="number" name="receivedQuantity" class="form-control" value="{{ $item['receivedQuantity'] ?? 0 }}" min="0" max="{{ $item['quantity'] }}" required>
+                                                                    </div>
+                                                                    <p class="text-xs text-secondary mb-0">Pesanan: {{ $item['quantity'] }} {{ $item['unit'] ?? '' }}</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn bg-gradient-secondary mb-0" data-bs-dismiss="modal">Batal</button>
+                                                                    <button type="submit" class="btn bg-gradient-success mb-0">Simpan Perubahan</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @elseif(($item['receivedQuantity'] ?? 0) >= ($item['quantity'] ?? 1))
+                                                    <span class="text-success text-xs font-weight-bold"><i class="material-icons text-sm align-middle">check_circle</i> Selesai</span>
+                                                @else
+                                                    <span class="text-xs text-secondary">-</span>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty

@@ -16,6 +16,15 @@
                 <button type="button" class="btn-close text-lg py-3 opacity-10" data-bs-dismiss="alert"></button>
             </div>
             @endif
+            @if($errors->any())
+            <div class="alert alert-danger text-white text-sm">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
 
             <div class="row mb-3">
                 @php
@@ -94,7 +103,7 @@
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stok Saat Ini</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min. Stok</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Lokasi</th>
-                                            <th class="text-secondary opacity-7">Aksi</th>
+                                            <th class="text-center text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -135,7 +144,7 @@
                                             <td>
                                                 <span class="text-secondary text-xs">{{ $item['location'] ?? '-' }}</span>
                                             </td>
-                                            <td class="align-middle">
+                                            <td class="align-middle text-center">
                                                 <button type="button"
                                                     class="btn btn-link text-info text-xs p-0 mb-0"
                                                     title="Sesuaikan Stok"

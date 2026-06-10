@@ -51,7 +51,7 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Kode</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Lokasi</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kapasitas</th>
-                                            <th class="text-secondary opacity-7">Detail</th>
+                                            <th class="text-center text-secondary opacity-7">Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -79,9 +79,9 @@
                                             <td class="align-middle text-center">
                                                 <span class="text-secondary text-xs">{{ $room['capacity'] ?? '-' }}</span>
                                             </td>
-                                            <td class="align-middle">
+                                            <td class="align-middle text-center">
                                                 <a href="{{ route('global.rooms.show', $room['_id']) }}"
-                                                   class="btn btn-link text-primary text-xs p-0 mb-0"
+                                                   class="btn btn-link text-info text-xs p-0 mb-0"
                                                    title="Lihat Aset di Ruangan Ini">
                                                     <i class="material-icons text-sm">visibility</i> Lihat Aset
                                                 </a>

@@ -38,7 +38,7 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Dilakukan Oleh</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kondisi Sesudah</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal</th>
-                                            <th class="text-secondary opacity-7">Detail</th>
+                                            <th class="text-center text-secondary opacity-7">Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,7 +105,7 @@
                                                     {{ isset($log['maintenanceDate']) ? \Carbon\Carbon::parse($log['maintenanceDate'])->format('d M Y') : '-' }}
                                                 </span>
                                             </td>
-                                            <td class="align-middle">
+                                            <td class="align-middle text-center">
                                                 <a href="{{ route('staf-lab.maintenance.show', $log['_id']) }}" class="text-info font-weight-bold text-xs" title="Lihat Detail">
                                                     <i class="material-icons text-sm">visibility</i>
                                                 </a>
