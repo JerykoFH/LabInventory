@@ -86,6 +86,11 @@ const submitDraft = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Only drafts with status "draft" can be submitted' });
         }
 
+        const itemsCount = await ProcurementItem.countDocuments({ draft: draft._id });
+        if (itemsCount === 0) {
+            return res.status(400).json({ success: false, message: 'Draf tidak bisa disubmit karena belum ada barang (kosong).' });
+        }
+
         draft.status = 'submitted';
         draft.submittedAt = new Date();
         await draft.save();
