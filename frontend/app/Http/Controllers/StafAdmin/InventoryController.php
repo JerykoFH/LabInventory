@@ -68,4 +68,18 @@ class InventoryController extends Controller
 
         return back()->withErrors($response->json('message'));
     }
+    public function updateReceivedDate(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'receivedDate' => 'required|date',
+        ]);
+
+        $response = $this->api->patch("/api/staf-admin/assets/{$id}/receive", $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('staf-admin.assets.index')->with('success', 'Tanggal penerimaan aset berhasil diperbarui.');
+        }
+
+        return back()->withErrors($response->json('message'));
+    }
 }

@@ -174,7 +174,7 @@ const createMaintenanceLog = async (req, res) => {
                     const index = parseInt(match[2], 10);
                     if (assets[index]) {
                         // Store the URL path
-                        assets[index][ field === 'photoBefore' ? 'photoBefore' : 'photoAfter' ] = `/uploads/maintenance/${file.filename}`;
+                        assets[index][ field === 'photoBefore' ? 'conditionPhotoBefore' : 'conditionPhotoAfter' ] = `/uploads/maintenance/${file.filename}`;
                     }
                 }
             });
