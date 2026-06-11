@@ -91,6 +91,11 @@
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
                                 <h6 class="text-white text-capitalize ps-3 mb-0">Daftar Barang Habis Pakai</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="input-group input-group-outline" style="max-width: 220px;">
+                                        <input type="text" id="searchBHP" class="form-control form-control-sm text-white" placeholder="Cari item..." style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
@@ -112,14 +117,14 @@
                                             $isLow = ($item['currentStock'] ?? 0) <= ($item['minimumStock'] ?? 5);
                                             $isOut = ($item['currentStock'] ?? 0) == 0;
                                         @endphp
-                                        <tr>
+                                        <tr class="bhp-row">
                                             <td>
                                                 <div class="d-flex px-2 py-1">
                                                     <div class="icon icon-sm icon-shape {{ $isOut ? 'bg-gradient-danger' : ($isLow ? 'bg-gradient-warning' : 'bg-gradient-info') }} shadow text-center border-radius-md me-2 d-flex align-items-center justify-content-center">
                                                         <i class="material-icons opacity-10 text-white" style="font-size: 16px;">science</i>
                                                     </div>
                                                     <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ $item['name'] }}</h6>
+                                                        <h6 class="mb-0 text-sm bhp-name">{{ $item['name'] }}</h6>
                                                         @if($item['notes'] ?? false)
                                                             <p class="text-xs text-secondary mb-0">{{ Str::limit($item['notes'], 40) }}</p>
                                                         @endif
@@ -205,4 +210,16 @@
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
+
+    @push('js')
+    <script>
+        document.getElementById('searchBHP').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('.bhp-row').forEach(function(row) {
+                const name = row.querySelector('.bhp-name')?.textContent.toLowerCase() ?? '';
+                row.style.display = name.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+    @endpush
 </x-layout>
