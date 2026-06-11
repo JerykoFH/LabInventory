@@ -101,17 +101,52 @@
                 <div class="col-12">
                     <div class="card my-4">
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
-                                <h6 class="text-white text-capitalize ps-3 mb-0">Daftar Aset Inventaris Laboratorium</h6>
-                                <div class="d-flex align-items-center gap-2">
-                                    {{-- Search Filter (client-side) --}}
-                                    <div class="input-group input-group-outline" style="max-width: 220px;">
-                                        <input type="text" id="searchAsset" class="form-control form-control-sm text-white" placeholder="Cari aset..." style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">
+                            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                                <h6 class="text-white text-capitalize ps-3">Daftar Aset Inventaris Laboratorium</h6>
+                            </div>
+                        </div>
+
+                        <div class="card-body px-4 pb-2 mt-3">
+                            <div class="row align-items-end">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label mb-1 text-xs text-secondary">Pencarian</label>
+                                    <div class="input-group border border-radius-md">
+                                        <input type="text" id="searchInput" class="form-control px-3 border-0" placeholder="Cari nama aset...">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label mb-1 text-xs text-secondary">Dari Tanggal Diterima</label>
+                                    <div class="input-group border border-radius-md">
+                                        <input type="date" id="startDate" class="form-control px-3 border-0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label mb-1 text-xs text-secondary">Sampai Tanggal Diterima</label>
+                                    <div class="input-group border border-radius-md">
+                                        <input type="date" id="endDate" class="form-control px-3 border-0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label mb-1 text-xs text-secondary">Urutkan</label>
+                                    <div class="dropdown w-100">
+                                        <button class="btn dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center bg-white px-3 mb-0 border-radius-md" 
+                                                style="border: 1px solid #dee2e6; color: #495057; text-transform: none; font-weight: normal; padding-top: 0.6rem; padding-bottom: 0.6rem;" 
+                                                type="button" id="sortDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Terbaru
+                                        </button>
+                                        <ul class="dropdown-menu w-100 px-2 py-2" aria-labelledby="sortDropdownBtn">
+                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="newest">Terbaru</a></li>
+                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="oldest">Terlama</a></li>
+                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="az">Abjad (A-Z)</a></li>
+                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="za">Abjad (Z-A)</a></li>
+                                        </ul>
+                                        <input type="hidden" id="sortSelect" value="newest">
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-body px-0 pb-2">
+
+                        <div class="card-body px-0 pb-2 pt-0">
                             <div class="table-responsive p-0">
                                 <table class="table align-items-center mb-0" id="assetTable">
                                     <thead>
@@ -126,9 +161,11 @@
                                             <th class="text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="assetsTableBody">
                                         @forelse($assets as $asset)
-                                        <tr class="asset-row">
+                                        <tr class="asset-row" 
+                                            data-name="{{ strtolower($asset['name']) }}" 
+                                            data-date="{{ isset($asset['receivedDate']) ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '2000-01-01' }}">
                                             <td>
                                                 <div class="d-flex px-2 py-1">
                                                     <div class="icon icon-sm icon-shape {{ empty($asset['assetCode']) ? 'bg-gradient-secondary' : 'bg-gradient-primary' }} shadow text-center border-radius-md me-2 d-flex align-items-center justify-content-center">
@@ -298,44 +335,7 @@
                                                     </div>
                                                 </div>
 
-                                                {{-- Set Tgl Penerimaan --}}
-                                                <button type="button"
-                                                    class="btn btn-link text-success text-xs p-0 mb-0"
-                                                    title="Set Tanggal Diterima"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#receiveModal{{ $asset['_id'] }}">
-                                                    <i class="material-icons text-sm">event_available</i>
-                                                </button>
 
-                                                {{-- Modal Receive --}}
-                                                <div class="modal fade" id="receiveModal{{ $asset['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                                        <div class="modal-content text-start">
-                                                            <form action="{{ route('staf-admin.assets.receive', $asset['_id']) }}" method="POST">
-                                                                @csrf
-                                                                @method('PATCH')
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title font-weight-normal">Update Tanggal Diterima</h5>
-                                                                    <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
-                                                                    <div class="input-group input-group-outline my-3 is-filled">
-                                                                        <label class="form-label">Tanggal Penerimaan <span class="text-danger">*</span></label>
-                                                                        <input type="date" name="receivedDate" class="form-control"
-                                                                            value="{{ $asset['receivedDate'] ?? false ? \Carbon\Carbon::parse($asset['receivedDate'])->format('Y-m-d') : '' }}" required>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                    <button type="submit" class="btn bg-gradient-success">Simpan Tanggal</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </td>
                                         </tr>
                                         @empty
@@ -360,11 +360,74 @@
 
     @push('js')
     <script>
-        document.getElementById('searchAsset').addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll('.asset-row').forEach(function(row) {
-                const name = row.querySelector('.asset-name')?.textContent.toLowerCase() ?? '';
-                row.style.display = name.includes(query) ? '' : 'none';
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const sortSelect = document.getElementById('sortSelect');
+            const tableBody = document.getElementById('assetsTableBody');
+
+            function filterAndSort() {
+                const searchTxt = searchInput.value.toLowerCase();
+                const start = startDate.value;
+                const end = endDate.value;
+                const sortBy = sortSelect.value;
+                
+                const rows = Array.from(tableBody.querySelectorAll('.asset-row'));
+
+                rows.forEach(row => {
+                    const name = row.getAttribute('data-name');
+                    const date = row.getAttribute('data-date');
+                    let show = true;
+
+                    if (searchTxt && !name.includes(searchTxt)) {
+                        show = false;
+                    }
+                    if (start && date < start) {
+                        show = false;
+                    }
+                    if (end && date > end) {
+                        show = false;
+                    }
+
+                    row.style.display = show ? '' : 'none';
+                });
+
+                const visibleRows = rows.filter(row => row.style.display !== 'none');
+                visibleRows.sort((a, b) => {
+                    if (sortBy === 'az') {
+                        return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+                    } else if (sortBy === 'za') {
+                        return b.getAttribute('data-name').localeCompare(a.getAttribute('data-name'));
+                    } else if (sortBy === 'newest') {
+                        return b.getAttribute('data-date').localeCompare(a.getAttribute('data-date'));
+                    } else if (sortBy === 'oldest') {
+                        return a.getAttribute('data-date').localeCompare(b.getAttribute('data-date'));
+                    }
+                    return 0;
+                });
+
+                visibleRows.forEach(row => tableBody.appendChild(row));
+            }
+
+            searchInput.addEventListener('keyup', filterAndSort);
+            startDate.addEventListener('change', filterAndSort);
+            endDate.addEventListener('change', filterAndSort);
+            
+            const sortDropdownBtn = document.getElementById('sortDropdownBtn');
+            const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
+            
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const val = this.getAttribute('data-val');
+                    const text = this.innerText;
+                    
+                    sortSelect.value = val;
+                    sortDropdownBtn.childNodes[0].nodeValue = text + ' ';
+                    
+                    filterAndSort();
+                });
             });
         });
     </script>
