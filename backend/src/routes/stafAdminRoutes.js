@@ -11,7 +11,8 @@ const {
     getAssetByCode,
     createAsset,
     setProcurementProgress,
-    receiveProcurementItem
+    receiveProcurementItem,
+    updateAssetCondition
 } = require('../controllers/inventoryController');
 
 router.use(protect, authorize('staf_admin'));
@@ -26,5 +27,6 @@ router.get('/assets/:id', getAssetById);
 router.post('/assets', createAsset);
 router.patch('/assets/:id/label', updateAssetLabel);
 router.patch('/assets/:id/receive', setReceivedDate);
+router.patch('/assets/:id/condition', updateAssetCondition);
 
 module.exports = router;

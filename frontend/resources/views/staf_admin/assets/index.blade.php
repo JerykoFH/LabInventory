@@ -257,6 +257,47 @@
                                                     </div>
                                                 </div>
                                                 
+                                                <button type="button"
+                                                    class="btn btn-link text-warning text-xs p-0 mb-0 me-2"
+                                                    title="Update Kondisi"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#conditionModal{{ $asset['_id'] }}">
+                                                    <i class="material-icons text-sm">build</i>
+                                                </button>
+
+                                                <div class="modal fade" id="conditionModal{{ $asset['_id'] }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content text-start">
+                                                            <form action="{{ route('staf-admin.assets.condition', $asset['_id']) }}" method="POST">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title font-weight-normal">Update Kondisi Aset</h5>
+                                                                    <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
+                                                                    <div class="input-group input-group-static my-3">
+                                                                        <label class="ms-0">Kondisi</label>
+                                                                        <select name="condition" class="form-control" required>
+                                                                            <option value="baik" {{ ($asset['condition'] ?? 'baik') == 'baik' ? 'selected' : '' }}>Baik</option>
+                                                                            <option value="rusak_ringan" {{ ($asset['condition'] ?? 'baik') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                                                            <option value="rusak_berat" {{ ($asset['condition'] ?? 'baik') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                                                            <option value="tidak_aktif" {{ ($asset['condition'] ?? 'baik') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                    <button type="submit" class="btn bg-gradient-warning">Simpan Kondisi</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                                 {{-- Set Tgl Penerimaan --}}
                                                 <button type="button"
                                                     class="btn btn-link text-success text-xs p-0 mb-0"

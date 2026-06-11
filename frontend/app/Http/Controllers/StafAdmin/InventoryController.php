@@ -116,4 +116,19 @@ class InventoryController extends Controller
 
         return back()->withErrors($response->json('message'));
     }
+
+    public function updateCondition(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'condition' => 'required|in:baik,rusak_ringan,rusak_berat,tidak_aktif',
+        ]);
+
+        $response = $this->api->patch("/api/staf-admin/assets/{$id}/condition", $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('staf-admin.assets.index')->with('success', 'Kondisi aset berhasil diperbarui.');
+        }
+
+        return back()->withErrors($response->json('message'));
+    }
 }
