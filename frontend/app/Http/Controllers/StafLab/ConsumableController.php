@@ -17,7 +17,10 @@ class ConsumableController extends Controller
         $response = $this->api->get('/api/staf-lab/consumables');
         $items = $response->successful() ? $response->json('data') : [];
 
-        return view('staf_lab.consumables.index', compact('items'));
+        $roomsResponse = $this->api->get('/api/global/rooms');
+        $rooms = $roomsResponse->successful() ? $roomsResponse->json('data') : [];
+
+        return view('staf_lab.consumables.index', compact('items', 'rooms'));
     }
 
     // Tampilkan form untuk menambah item barang habis pakai baru

@@ -82,8 +82,8 @@
                                             <td class="align-middle text-center">
                                                 <a href="{{ route('global.rooms.show', $room['_id']) }}"
                                                    class="btn btn-link text-info text-xs p-0 mb-0"
-                                                   title="Lihat Aset di Ruangan Ini">
-                                                    <i class="material-icons text-sm">visibility</i> Lihat Aset
+                                                   title="Lihat Aset & BHP di Ruangan Ini">
+                                                    <i class="material-icons text-sm">visibility</i> Lihat Aset & BHP
                                                 </a>
                                             </td>
                                         </tr>

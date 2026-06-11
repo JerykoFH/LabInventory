@@ -87,7 +87,7 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Kategori</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stok Saat Ini</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min. Stok</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Lokasi</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ruangan</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -126,7 +126,27 @@
                                                 <span class="text-secondary text-xs">{{ $item['minimumStock'] ?? 5 }} {{ $item['unit'] }}</span>
                                             </td>
                                             <td>
-                                                <span class="text-secondary text-xs">{{ $item['location'] ?? '-' }}</span>
+                                                @php
+                                                    $roomMatch = collect($rooms ?? [])->first(function($r) use ($item) {
+                                                        $loc = strtolower($item['location'] ?? '');
+                                                        $rName = strtolower($r['name'] ?? '');
+                                                        
+                                                        $keywords = ['jaringan', 'pemrograman', 'multimedia', 'basis data'];
+                                                        foreach ($keywords as $keyword) {
+                                                            if (str_contains($loc, $keyword) && str_contains($rName, $keyword)) {
+                                                                return true;
+                                                            }
+                                                        }
+                                                        return false;
+                                                    });
+                                                @endphp
+                                                @if($roomMatch)
+                                                    <a href="{{ route('global.rooms.show', $roomMatch['_id']) }}" class="text-info text-xs font-weight-bold d-flex align-items-center gap-1" title="Lihat detail ruangan">
+                                                        <i class="material-icons text-sm">meeting_room</i> {{ $roomMatch['name'] }}
+                                                    </a>
+                                                @else
+                                                    <span class="text-secondary text-xs">{{ $item['location'] ?? '-' }}</span>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty
