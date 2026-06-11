@@ -70,6 +70,7 @@ Route::prefix('staf-admin')->name('staf-admin.')->middleware(['api.auth', 'role:
     Route::get('assets/{id}',          [InventoryController::class, 'show'])->name('assets.show');
     Route::patch('assets/{id}/label',  [InventoryController::class, 'updateLabel'])->name('assets.label');
     Route::patch('assets/{id}/receive', [InventoryController::class, 'updateReceivedDate'])->name('assets.receive');
+    Route::patch('assets/{id}/condition', [InventoryController::class, 'updateCondition'])->name('assets.condition');
 
     // Scanner
     Route::get('scanner',              [\App\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');

@@ -121,6 +121,36 @@ const setReceivedDate = async (req, res) => {
 };
 
 /**
+ * PATCH /api/staf-admin/assets/:id/condition
+ * Update kondisi barang
+ * Body: { condition }
+ */
+const updateAssetCondition = async (req, res) => {
+    try {
+        const { condition } = req.body;
+        if (!condition) {
+            return res.status(400).json({ success: false, message: 'Kondisi wajib diisi' });
+        }
+
+        const validConditions = ['baik', 'rusak_ringan', 'rusak_berat', 'tidak_aktif'];
+        if (!validConditions.includes(condition)) {
+            return res.status(400).json({ success: false, message: 'Kondisi tidak valid' });
+        }
+
+        const asset = await Asset.findByIdAndUpdate(
+            req.params.id,
+            { condition },
+            { new: true, runValidators: true }
+        );
+        
+        if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        res.json({ success: true, data: asset });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
  * GET /api/.../assets/scan/:code
  * Cari aset berdasarkan assetCode atau qrCode
  */
@@ -222,6 +252,7 @@ module.exports = {
     getAssetById,
     updateAssetLabel, 
     setReceivedDate,
+    updateAssetCondition,
     getAssetByCode,
     createAsset,
     setProcurementProgress,
