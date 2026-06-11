@@ -46,9 +46,10 @@
                                     <p class='text-danger inputerror'>{{ $message }}</p>
                                     @enderror
 
-                                    <div class="input-group input-group-outline mt-3">
+                                    <div class="input-group input-group-outline mt-3 position-relative">
                                         <label class="form-label">Password</label>
-                                        <input type="password" class="form-control" name="password" id="password">
+                                        <input type="password" class="form-control" name="password" id="password" style="padding-right: 40px;">
+                                        <i class="material-icons position-absolute cursor-pointer" id="togglePassword" style="right: 10px; top: 50%; transform: translateY(-50%); font-size: 20px; z-index: 10; color: #7b809a;">visibility_off</i>
                                     </div>
                                     @error('password')
                                     <p class='text-danger inputerror'>{{ $message }}</p>
@@ -83,6 +84,13 @@
                 if ($(this).val() === "") {
                     $(this).closest('.input-group').removeClass('is-filled');
                 }
+            });
+
+            $('#togglePassword').on('click', function() {
+                const passwordField = $('#password');
+                const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+                passwordField.attr('type', type);
+                $(this).text(type === 'password' ? 'visibility_off' : 'visibility');
             });
         });
     </script>
