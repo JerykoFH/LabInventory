@@ -1,5 +1,6 @@
 const ProcurementDraft = require('../models/ProcurementDraft');
 const ProcurementItem = require('../models/ProcurementItem');
+const { logActivity } = require('../utils/logger');
 
 /**
  * GET /api/kaprodi/procurements
@@ -67,6 +68,11 @@ const reviewItem = async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+        
+        const actionType = approvalStatus === 'approved' ? 'APPROVE' : 'REJECT';
+        const actionText = approvalStatus === 'approved' ? 'Menyetujui' : 'Menolak';
+        await logActivity(req, actionType, 'ProcurementItem', item._id, `${actionText} pengadaan item ${item.name}`, { rejectionReason });
+        
         res.json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -89,6 +95,8 @@ const finalizeDraft = async (req, res) => {
         draft.lockedAt = new Date();
         draft.reviewedBy = req.user._id;
         await draft.save();
+
+        await logActivity(req, 'APPROVE', 'ProcurementDraft', draft._id, `Memfinalisasi draf pengadaan: ${draft.title}`);
 
         res.json({ success: true, message: 'Draft finalized and locked', data: draft });
     } catch (error) {

@@ -23,6 +23,15 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['api.auth'])
     ->name('dashboard');
 
+// History/Log (semua role)
+use App\Http\Controllers\HistoryController;
+Route::get('/history', [HistoryController::class, 'index'])
+    ->middleware(['api.auth'])
+    ->name('history.index');
+Route::get('/history/pdf', [HistoryController::class, 'exportPdf'])
+    ->middleware(['api.auth'])
+    ->name('history.pdf');
+
 // Administrator 
 Route::prefix('admin')->name('admin.')->middleware(['api.auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);

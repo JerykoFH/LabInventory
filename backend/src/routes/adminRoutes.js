@@ -27,4 +27,8 @@ router.get('/rooms/:id', getRoomById);
 router.put('/rooms/:id', updateRoom);
 router.delete('/rooms/:id', deleteRoom);
 
+// History (Activity Log)
+const { getHistory } = require('../controllers/historyController');
+router.get('/history', getHistory);
+
 module.exports = router;

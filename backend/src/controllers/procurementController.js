@@ -1,5 +1,6 @@
 const ProcurementDraft = require('../models/ProcurementDraft');
 const ProcurementItem = require('../models/ProcurementItem');
+const { logActivity } = require('../utils/logger');
 
 /**
  * GET /api/kepala-lab/procurements
@@ -28,6 +29,9 @@ const createDraft = async (req, res) => {
             createdBy: req.user._id,
             status: 'draft',
         });
+        
+        await logActivity(req, 'CREATE', 'ProcurementDraft', draft._id, `Membuat draf pengadaan baru: ${title} (${year})`);
+        
         res.status(201).json({ success: true, data: draft });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -68,6 +72,9 @@ const updateDraft = async (req, res) => {
         const { title, year, notes } = req.body;
         Object.assign(draft, { title, year, notes });
         await draft.save();
+        
+        await logActivity(req, 'UPDATE', 'ProcurementDraft', draft._id, `Memperbarui draf pengadaan: ${title}`);
+        
         res.json({ success: true, data: draft });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -94,6 +101,9 @@ const submitDraft = async (req, res) => {
         draft.status = 'submitted';
         draft.submittedAt = new Date();
         await draft.save();
+        
+        await logActivity(req, 'UPDATE', 'ProcurementDraft', draft._id, `Mengajukan draf pengadaan ke Kaprodi: ${draft.title}`);
+        
         res.json({ success: true, message: 'Draft submitted for review', data: draft });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -114,9 +124,12 @@ const deleteDraft = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Only unsubmitted drafts can be deleted' });
         }
 
+        const draftTitle = draft.title;
         // Hapus item-item di dalamnya juga
         await ProcurementItem.deleteMany({ draft: draft._id });
         await draft.deleteOne();
+
+        await logActivity(req, 'DELETE', 'ProcurementDraft', draft._id, `Menghapus draf pengadaan: ${draftTitle}`);
 
         res.json({ success: true, message: 'Draft successfully deleted' });
     } catch (error) {
@@ -139,6 +152,9 @@ const addItem = async (req, res) => {
         }
 
         const item = await ProcurementItem.create({ ...req.body, draft: draft._id });
+        
+        await logActivity(req, 'CREATE', 'ProcurementItem', item._id, `Menambahkan item ${item.name} ke draf ${draft.title}`);
+        
         res.status(201).json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -163,6 +179,9 @@ const updateItem = async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+        
+        await logActivity(req, 'UPDATE', 'ProcurementItem', item._id, `Memperbarui item ${item.name} di draf ${draft.title}`);
+        
         res.json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -181,7 +200,10 @@ const deleteItem = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Cannot delete items from a locked draft' });
         }
 
-        await ProcurementItem.findOneAndDelete({ _id: req.params.itemId, draft: draft._id });
+        const item = await ProcurementItem.findOneAndDelete({ _id: req.params.itemId, draft: draft._id });
+        if (item) {
+            await logActivity(req, 'DELETE', 'ProcurementItem', item._id, `Menghapus item ${item.name} dari draf ${draft.title}`);
+        }
         res.json({ success: true, message: 'Item removed' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

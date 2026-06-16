@@ -2,6 +2,7 @@ const ConsumableItem = require('../models/ConsumableItem');
 const MaintenanceLog = require('../models/MaintenanceLog');
 const Asset = require('../models/Asset');
 const Room = require('../models/Room');
+const { logActivity } = require('../utils/logger');
 
 // Mengelola stok barang habis pakai (BHP) — tambah, kurangi, lihat stok
 
@@ -56,6 +57,9 @@ const createConsumable = async (req, res) => {
             minimumStock: minimumStock !== undefined ? minimumStock : 5,
             ...rest
         });
+        
+        await logActivity(req, 'CREATE', 'ConsumableItem', item._id, `Mendaftarkan barang BHP baru: ${item.name}`, { initialStock: item.currentStock });
+        
         res.status(201).json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -83,8 +87,12 @@ const adjustStock = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Stok tidak mencukupi untuk pengurangan ini' });
         }
 
+        const oldStock = item.currentStock;
         item.currentStock = newStock;
         await item.save();
+        
+        await logActivity(req, 'ADJUST_STOCK', 'ConsumableItem', item._id, `Menyesuaikan stok ${item.name} sejumlah ${adjustment}. Stok sekarang: ${newStock}. Alasan: ${reason || '-'}`, { oldStock, newStock, reason });
+        
         res.json({ success: true, data: item });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -210,8 +218,11 @@ const createMaintenanceLog = async (req, res) => {
                         message: `Insufficient stock for ${consumable.name}`,
                     });
                 }
+                const oldStock = consumable.currentStock;
                 consumable.currentStock -= usage.quantityUsed;
                 await consumable.save();
+                
+                await logActivity(req, 'ADJUST_STOCK', 'ConsumableItem', consumable._id, `Pemakaian ${usage.quantityUsed} ${consumable.unit} untuk maintenance`, { oldStock, newStock: consumable.currentStock, reason: 'Pemeliharaan Aset' });
             }
         }
 
@@ -246,6 +257,8 @@ const createMaintenanceLog = async (req, res) => {
             { path: 'assets.asset', select: 'name assetCode' },
             { path: 'consumablesUsed.item', select: 'name unit' },
         ]);
+
+        await logActivity(req, 'CREATE', 'MaintenanceLog', log._id, `Mencatat pemeliharaan tipe ${type} untuk ${assets.length} aset di ruangan ${roomDoc.name}`);
 
         res.status(201).json({ success: true, data: populated });
     } catch (error) {

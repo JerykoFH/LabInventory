@@ -19,4 +19,8 @@ router.get('/consumables', getAllConsumables);
 router.get('/rooms', getAllRooms);
 router.get('/rooms/:id/assets', getAssetsByRoom);
 
+// History (Activity Log)
+const { getHistory } = require('../controllers/historyController');
+router.get('/history', getHistory);
+
 module.exports = router;
