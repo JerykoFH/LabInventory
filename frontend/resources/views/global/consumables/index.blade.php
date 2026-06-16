@@ -201,8 +201,4 @@
         </div>
     </main>
 
-    @push('js')
-    <script>
-    </script>
-    @endpush
 </x-layout>
