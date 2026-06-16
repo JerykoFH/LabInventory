@@ -196,7 +196,6 @@ async function seed() {
 
         console.log(`${assets.length} assets created`);
 
-        // 4. Consumable Items (BHP) 
         const consumables = await ConsumableItem.insertMany([
             {
                 name: 'Kabel UTP Cat6 (1 box = 305m)',
@@ -204,7 +203,7 @@ async function seed() {
                 unit: 'box',
                 currentStock: 3,
                 minimumStock: 2,
-                location: 'Gudang Lab Jaringan',
+                location: 'Laboratorium Jaringan Komputer',
             },
             {
                 name: 'Konektor RJ-45',
@@ -212,7 +211,7 @@ async function seed() {
                 unit: 'pack (100 pcs)',
                 currentStock: 10,
                 minimumStock: 5,
-                location: 'Gudang Lab Jaringan',
+                location: 'Laboratorium Jaringan Komputer',
             },
             {
                 name: 'Toner HP 76A (CF276A)',
@@ -220,7 +219,7 @@ async function seed() {
                 unit: 'pcs',
                 currentStock: 1,
                 minimumStock: 2,
-                location: 'Gudang Lab Basis Data',
+                location: 'Laboratorium Basis Data',
                 notes: 'Stok menipis, perlu pengadaan segera',
             },
             {
@@ -229,7 +228,7 @@ async function seed() {
                 unit: 'tube',
                 currentStock: 8,
                 minimumStock: 3,
-                location: 'Gudang Lab Pemrograman',
+                location: 'Laboratorium Pemrograman',
             },
             {
                 name: 'Tisu Pembersih LCD',
@@ -237,7 +236,7 @@ async function seed() {
                 unit: 'pack (50 lembar)',
                 currentStock: 12,
                 minimumStock: 5,
-                location: 'Gudang Lab Multimedia',
+                location: 'Laboratorium Multimedia',
             },
         ]);
 

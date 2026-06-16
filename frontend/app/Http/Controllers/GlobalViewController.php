@@ -9,23 +9,32 @@ class GlobalViewController extends Controller
 {
     public function __construct(protected ApiClient $api) {}
 
-    public function assets()
+    public function assets(Request $request)
     {
-        $response = $this->api->get('/api/global/assets');
+        $allResp = $this->api->get('/api/global/assets');
+        $allData = $allResp->successful() ? $allResp->json('data') : [];
+        $categories = collect($allData)->pluck('category')->filter()->unique()->values();
+
+        $response = $this->api->get('/api/global/assets', $request->query());
         $assets = $response->successful() ? $response->json('data') : [];
-
-        return view('global.assets.index', compact('assets'));
-    }
-
-    public function consumables()
-    {
-        $response = $this->api->get('/api/global/consumables');
-        $items = $response->successful() ? $response->json('data') : [];
 
         $roomsResponse = $this->api->get('/api/global/rooms');
         $rooms = $roomsResponse->successful() ? $roomsResponse->json('data') : [];
 
-        return view('global.consumables.index', compact('items', 'rooms'));
+        return view('global.assets.index', compact('assets', 'rooms', 'categories'));
+    }
+
+    public function consumables(Request $request)
+    {
+        $allResp = $this->api->get('/api/global/consumables');
+        $allData = $allResp->successful() ? $allResp->json('data') : [];
+        $categories = collect($allData)->pluck('category')->filter()->unique()->values();
+        $locations = collect($allData)->pluck('location')->filter()->unique()->values();
+
+        $response = $this->api->get('/api/global/consumables', $request->query());
+        $items = $response->successful() ? $response->json('data') : [];
+
+        return view('global.consumables.index', compact('items', 'categories', 'locations'));
     }
 
     public function rooms()

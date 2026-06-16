@@ -11,7 +11,24 @@ const Room = require('../models/Room');
  */
 const getAllConsumables = async (req, res) => {
     try {
-        const items = await ConsumableItem.find().sort({ name: 1 });
+        let filter = {};
+        const { category, stockStatus, location, search } = req.query;
+
+        if (category) filter.category = category;
+        if (location) filter.location = location;
+        if (search) filter.name = { $regex: search, $options: 'i' };
+        
+        if (stockStatus) {
+            if (stockStatus === 'aman') {
+                 filter.$expr = { $gt: ["$currentStock", "$minimumStock"] };
+            } else if (stockStatus === 'menipis') {
+                 filter.$expr = { $and: [ { $lte: ["$currentStock", "$minimumStock"] }, { $gt: ["$currentStock", 0] } ] };
+            } else if (stockStatus === 'habis') {
+                 filter.currentStock = 0;
+            }
+        }
+
+        const items = await ConsumableItem.find(filter).sort({ name: 1 });
         res.json({ success: true, count: items.length, data: items });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

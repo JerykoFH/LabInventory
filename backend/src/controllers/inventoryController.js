@@ -45,13 +45,24 @@ const getLockedDraftDetail = async (req, res) => {
 const getAllAssets = async (req, res) => {
     try {
         let filter = {};
-        const { received } = req.query;
+        const { received, category, condition, status, room, search } = req.query;
         
         // Filter berdasarkan status penerimaan
         if (received === 'true') {
             filter.receivedDate = { $ne: null };
         } else if (received === 'false') {
             filter.receivedDate = null;
+        }
+
+        if (category) filter.category = category;
+        if (condition) filter.condition = condition;
+        if (status) filter.status = status;
+        if (room) filter.room = room;
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { assetCode: { $regex: search, $options: 'i' } }
+            ];
         }
 
         const assets = await Asset.find(filter)
