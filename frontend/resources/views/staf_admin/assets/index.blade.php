@@ -106,44 +106,63 @@
                             </div>
                         </div>
 
-                        <div class="card-body px-4 pb-2 mt-3">
-                            <div class="row align-items-end">
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label mb-1 text-xs text-secondary">Pencarian</label>
-                                    <div class="input-group border border-radius-md">
-                                        <input type="text" id="searchInput" class="form-control px-3 border-0" placeholder="Cari nama aset...">
-                                    </div>
+                        <div class="card-body px-0 pb-2 mt-3">
+                            <form method="GET" action="{{ route('staf-admin.assets.index') }}" class="px-4 py-3 d-flex flex-wrap gap-3 align-items-end border-bottom">
+                                <div class="input-group input-group-static" style="width: 200px;">
+                                    <label>Pencarian</label>
+                                    <input type="text" name="search" class="form-control" placeholder="Cari nama/kode..." value="{{ request('search') }}">
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label mb-1 text-xs text-secondary">Dari Tanggal Diterima</label>
-                                    <div class="input-group border border-radius-md">
-                                        <input type="date" id="startDate" class="form-control px-3 border-0">
-                                    </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Kategori</label>
+                                    <select name="category" class="form-control">
+                                        <option value="">Semua Kategori</option>
+                                        @foreach($categories ?? [] as $cat)
+                                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label mb-1 text-xs text-secondary">Sampai Tanggal Diterima</label>
-                                    <div class="input-group border border-radius-md">
-                                        <input type="date" id="endDate" class="form-control px-3 border-0">
-                                    </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Ruangan</label>
+                                    <select name="room" class="form-control">
+                                        <option value="">Semua Ruangan</option>
+                                        @foreach($rooms ?? [] as $rm)
+                                            <option value="{{ $rm['_id'] }}" {{ request('room') == $rm['_id'] ? 'selected' : '' }}>{{ $rm['name'] }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label mb-1 text-xs text-secondary">Urutkan</label>
-                                    <div class="dropdown w-100">
-                                        <button class="btn dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center bg-white px-3 mb-0 border-radius-md" 
-                                                style="border: 1px solid #dee2e6; color: #495057; text-transform: none; font-weight: normal; padding-top: 0.6rem; padding-bottom: 0.6rem;" 
-                                                type="button" id="sortDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Terbaru
-                                        </button>
-                                        <ul class="dropdown-menu w-100 px-2 py-2" aria-labelledby="sortDropdownBtn">
-                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="newest">Terbaru</a></li>
-                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="oldest">Terlama</a></li>
-                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="az">Abjad (A-Z)</a></li>
-                                            <li><a class="dropdown-item border-radius-md" href="#" data-val="za">Abjad (Z-A)</a></li>
-                                        </ul>
-                                        <input type="hidden" id="sortSelect" value="newest">
-                                    </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Penerimaan</label>
+                                    <select name="received" class="form-control">
+                                        <option value="">Semua</option>
+                                        <option value="true" {{ request('received') === 'true' ? 'selected' : '' }}>Sudah Diterima</option>
+                                        <option value="false" {{ request('received') === 'false' ? 'selected' : '' }}>Belum Diterima</option>
+                                    </select>
                                 </div>
-                            </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Kondisi</label>
+                                    <select name="condition" class="form-control">
+                                        <option value="">Semua Kondisi</option>
+                                        <option value="baik" {{ request('condition') == 'baik' ? 'selected' : '' }}>Baik</option>
+                                        <option value="rusak_ringan" {{ request('condition') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                        <option value="rusak_berat" {{ request('condition') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                        <option value="tidak_aktif" {{ request('condition') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">Semua Status</option>
+                                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="dalam_pemeliharaan" {{ request('status') == 'dalam_pemeliharaan' ? 'selected' : '' }}>Dalam Pemeliharaan</option>
+                                        <option value="dihapus" {{ request('status') == 'dihapus' ? 'selected' : '' }}>Dihapus</option>
+                                        <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Sudah Diganti</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
+                                    <a href="{{ route('staf-admin.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
+                                </div>
+                            </form>
                         </div>
 
                         <div class="card-body px-0 pb-2 pt-0">
@@ -358,78 +377,4 @@
         </div>
     </main>
 
-    @push('js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const startDate = document.getElementById('startDate');
-            const endDate = document.getElementById('endDate');
-            const sortSelect = document.getElementById('sortSelect');
-            const tableBody = document.getElementById('assetsTableBody');
-
-            function filterAndSort() {
-                const searchTxt = searchInput.value.toLowerCase();
-                const start = startDate.value;
-                const end = endDate.value;
-                const sortBy = sortSelect.value;
-                
-                const rows = Array.from(tableBody.querySelectorAll('.asset-row'));
-
-                rows.forEach(row => {
-                    const name = row.getAttribute('data-name');
-                    const date = row.getAttribute('data-date');
-                    let show = true;
-
-                    if (searchTxt && !name.includes(searchTxt)) {
-                        show = false;
-                    }
-                    if (start && date < start) {
-                        show = false;
-                    }
-                    if (end && date > end) {
-                        show = false;
-                    }
-
-                    row.style.display = show ? '' : 'none';
-                });
-
-                const visibleRows = rows.filter(row => row.style.display !== 'none');
-                visibleRows.sort((a, b) => {
-                    if (sortBy === 'az') {
-                        return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
-                    } else if (sortBy === 'za') {
-                        return b.getAttribute('data-name').localeCompare(a.getAttribute('data-name'));
-                    } else if (sortBy === 'newest') {
-                        return b.getAttribute('data-date').localeCompare(a.getAttribute('data-date'));
-                    } else if (sortBy === 'oldest') {
-                        return a.getAttribute('data-date').localeCompare(b.getAttribute('data-date'));
-                    }
-                    return 0;
-                });
-
-                visibleRows.forEach(row => tableBody.appendChild(row));
-            }
-
-            searchInput.addEventListener('keyup', filterAndSort);
-            startDate.addEventListener('change', filterAndSort);
-            endDate.addEventListener('change', filterAndSort);
-            
-            const sortDropdownBtn = document.getElementById('sortDropdownBtn');
-            const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
-            
-            dropdownItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const val = this.getAttribute('data-val');
-                    const text = this.innerText;
-                    
-                    sortSelect.value = val;
-                    sortDropdownBtn.childNodes[0].nodeValue = text + ' ';
-                    
-                    filterAndSort();
-                });
-            });
-        });
-    </script>
-    @endpush
 </x-layout>

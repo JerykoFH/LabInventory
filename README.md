@@ -33,6 +33,13 @@ cd backend
    ```bash
    cp .env.example .env
    ```
+   **Penting (Fitur Email Notifikasi):** Jika Anda ingin mengaktifkan fitur pengiriman email pengadaan, buka file `.env` di direktori backend dan isikan kredensial SMTP Anda (contoh menggunakan *App Password* Gmail):
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=email.anda@gmail.com
+   SMTP_PASS=password_app_anda
+   ```
 
 3. Mengisi data awal (Seeding):
    Langkah ini wajib dilakukan saat pertama kali menjalankan aplikasi untuk membuat akun pengguna, ruangan, dan contoh aset ke dalam database.
@@ -109,5 +116,6 @@ Berikut adalah daftar akun yang dapat Anda gunakan untuk masuk ke dalam sistem. 
 - Manajemen Aset dan Ruangan: Dikelola secara penuh oleh Staf Admin.
 - Pemindai Barcode/QR Pintar: Memudahkan pencarian aset dan memungkinkan penambahan barang instan langsung menggunakan kamera perangkat.
 - Barang Habis Pakai dan Riwayat Pemeliharaan: Dikelola oleh Staf Lab.
-- Pengadaan Barang: Proses pengajuan draf oleh Kepala Lab yang kemudian direview dan disetujui oleh Kaprodi.
-- Cetak Laporan: Pimpinan laboratorium dapat mengunduh daftar inventaris dalam bentuk dokumen PDF maupun Microsoft Excel.
+- Pengadaan Barang: Proses pengajuan draf oleh Kepala Lab yang kemudian direview dan disetujui oleh Kaprodi, lengkap dengan Notifikasi Email otomatis.
+- Smart Alerts: Notifikasi peringatan di dashboard saat stok Barang Habis Pakai (BHP) hampir habis.
+- Cetak Laporan & Riwayat Sistem: Pimpinan laboratorium dapat melihat seluruh aktivitas log (*Audit Trail*) sistem dan mengunduh laporan inventaris dalam bentuk dokumen PDF maupun Microsoft Excel.

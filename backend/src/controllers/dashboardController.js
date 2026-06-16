@@ -18,7 +18,8 @@ const getDashboardStats = async (req, res) => {
             lowStockConsumables,
             totalDrafts,
             submittedDrafts,
-            maintenanceNeeded
+            maintenanceNeeded,
+            lowStockItemsData
         ] = await Promise.all([
             User.countDocuments({ isActive: true }),
             Room.countDocuments(),
@@ -27,7 +28,9 @@ const getDashboardStats = async (req, res) => {
             ConsumableItem.countDocuments({ $expr: { $lte: ['$currentStock', '$minimumStock'] } }),
             ProcurementDraft.countDocuments(),
             ProcurementDraft.countDocuments({ status: 'submitted' }),
-            Asset.countDocuments({ status: 'dalam_pemeliharaan' })
+            Asset.countDocuments({ status: 'dalam_pemeliharaan' }),
+            ConsumableItem.find({ $expr: { $lte: ['$currentStock', '$minimumStock'] } })
+                .select('name unit currentStock minimumStock location')
         ]);
 
         res.json({
@@ -40,7 +43,8 @@ const getDashboardStats = async (req, res) => {
                 lowStockConsumables,
                 totalDrafts,
                 submittedDrafts,
-                maintenanceNeeded
+                maintenanceNeeded,
+                lowStockItems: lowStockItemsData
             }
         });
     } catch (error) {

@@ -1,6 +1,7 @@
 const Asset = require('../models/Asset');
 const ProcurementDraft = require('../models/ProcurementDraft');
 const ProcurementItem = require('../models/ProcurementItem');
+const { logActivity } = require('../utils/logger');
 
 /**
  * GET /api/staf-admin/procurements
@@ -45,13 +46,24 @@ const getLockedDraftDetail = async (req, res) => {
 const getAllAssets = async (req, res) => {
     try {
         let filter = {};
-        const { received } = req.query;
+        const { received, category, condition, status, room, search } = req.query;
         
         // Filter berdasarkan status penerimaan
         if (received === 'true') {
             filter.receivedDate = { $ne: null };
         } else if (received === 'false') {
             filter.receivedDate = null;
+        }
+
+        if (category) filter.category = category;
+        if (condition) filter.condition = condition;
+        if (status) filter.status = status;
+        if (room) filter.room = room;
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { assetCode: { $regex: search, $options: 'i' } }
+            ];
         }
 
         const assets = await Asset.find(filter)
@@ -94,6 +106,9 @@ const updateAssetLabel = async (req, res) => {
             { new: true, runValidators: true }
         );
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        
+        await logActivity(req, 'UPDATE', 'Asset', asset._id, `Memperbarui label aset: ${asset.name}`, { assetCode, qrCode });
+        
         res.json({ success: true, data: asset });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -114,6 +129,9 @@ const setReceivedDate = async (req, res) => {
         );
         
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        
+        await logActivity(req, 'UPDATE', 'Asset', asset._id, `Mencatat penerimaan aset: ${asset.name}`, { receivedDate });
+        
         res.json({ success: true, data: asset });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -144,6 +162,9 @@ const updateAssetCondition = async (req, res) => {
         );
         
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
+        
+        await logActivity(req, 'UPDATE', 'Asset', asset._id, `Memperbarui kondisi aset ${asset.name} menjadi ${condition}`, { condition });
+        
         res.json({ success: true, data: asset });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -181,6 +202,9 @@ const createAsset = async (req, res) => {
     try {
         const newAsset = new Asset(req.body);
         await newAsset.save();
+        
+        await logActivity(req, 'CREATE', 'Asset', newAsset._id, `Menambahkan aset inventaris baru: ${newAsset.name}`);
+        
         res.status(201).json({ success: true, data: newAsset });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
@@ -195,6 +219,9 @@ const setProcurementProgress = async (req, res) => {
             { new: true }
         );
         if (!draft) return res.status(404).json({ success: false, message: 'Draft not found or not locked' });
+        
+        await logActivity(req, 'UPDATE', 'ProcurementDraft', draft._id, `Memulai proses pengadaan (in_progress)`);
+        
         res.json({ success: true, data: draft });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -237,7 +264,10 @@ const receiveProcurementItem = async (req, res) => {
         if (allReceived && allItems.length > 0) {
             draft.status = 'completed';
             await draft.save();
+            await logActivity(req, 'UPDATE', 'ProcurementDraft', draft._id, `Menyelesaikan pengadaan (Semua item telah diterima)`);
         }
+
+        await logActivity(req, 'UPDATE', 'ProcurementItem', item._id, `Menerima ${receivedQuantity} unit item pengadaan: ${item.name}`, { receivedQuantity });
 
         res.json({ success: true, data: { item, draftStatus: draft.status } });
     } catch (error) {

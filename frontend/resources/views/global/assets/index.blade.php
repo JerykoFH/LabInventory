@@ -89,14 +89,57 @@
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
                                 <h6 class="text-white text-capitalize ps-3 mb-0">Daftar Aset Inventaris Laboratorium</h6>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="input-group input-group-outline" style="max-width: 220px;">
-                                        <input type="text" id="searchAsset" class="form-control form-control-sm text-white" placeholder="Cari aset..." style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
+                            <form method="GET" action="{{ route('global.assets.index') }}" class="px-4 py-3 d-flex flex-wrap gap-3 align-items-end border-bottom">
+                                <div class="input-group input-group-static" style="width: 200px;">
+                                    <label>Pencarian</label>
+                                    <input type="text" name="search" class="form-control" placeholder="Cari nama/kode..." value="{{ request('search') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Kategori</label>
+                                    <select name="category" class="form-control">
+                                        <option value="">Semua Kategori</option>
+                                        @foreach($categories ?? [] as $cat)
+                                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Ruangan</label>
+                                    <select name="room" class="form-control">
+                                        <option value="">Semua Ruangan</option>
+                                        @foreach($rooms ?? [] as $rm)
+                                            <option value="{{ $rm['_id'] }}" {{ request('room') == $rm['_id'] ? 'selected' : '' }}>{{ $rm['name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Kondisi</label>
+                                    <select name="condition" class="form-control">
+                                        <option value="">Semua Kondisi</option>
+                                        <option value="baik" {{ request('condition') == 'baik' ? 'selected' : '' }}>Baik</option>
+                                        <option value="rusak_ringan" {{ request('condition') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
+                                        <option value="rusak_berat" {{ request('condition') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                                        <option value="tidak_aktif" {{ request('condition') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">Semua Status</option>
+                                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="dalam_pemeliharaan" {{ request('status') == 'dalam_pemeliharaan' ? 'selected' : '' }}>Pemeliharaan</option>
+                                        <option value="dihapus" {{ request('status') == 'dihapus' ? 'selected' : '' }}>Dihapus</option>
+                                        <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Diganti</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
+                                    <a href="{{ route('global.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
+                                </div>
+                            </form>
                             <div class="table-responsive p-0">
                                 <table class="table align-items-center mb-0" id="assetTable">
                                     <thead>
@@ -200,15 +243,4 @@
         </div>
     </main>
 
-    @push('js')
-    <script>
-        document.getElementById('searchAsset').addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll('.asset-row').forEach(function(row) {
-                const name = row.querySelector('.asset-name')?.textContent.toLowerCase() ?? '';
-                row.style.display = name.includes(query) ? '' : 'none';
-            });
-        });
-    </script>
-    @endpush
 </x-layout>

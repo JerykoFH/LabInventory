@@ -12,15 +12,17 @@ class ConsumableController extends Controller
     public function __construct(protected ApiClient $api) {}
 
     // Tampilkan semua item barang habis pakai beserta stok terkini
-    public function index()
+    public function index(Request $request)
     {
-        $response = $this->api->get('/api/staf-lab/consumables');
+        $allResp = $this->api->get('/api/staf-lab/consumables');
+        $allData = $allResp->successful() ? $allResp->json('data') : [];
+        $categories = collect($allData)->pluck('category')->filter()->unique()->values();
+        $locations = collect($allData)->pluck('location')->filter()->unique()->values();
+
+        $response = $this->api->get('/api/staf-lab/consumables', $request->query());
         $items = $response->successful() ? $response->json('data') : [];
 
-        $roomsResponse = $this->api->get('/api/global/rooms');
-        $rooms = $roomsResponse->successful() ? $roomsResponse->json('data') : [];
-
-        return view('staf_lab.consumables.index', compact('items', 'rooms'));
+        return view('staf_lab.consumables.index', compact('items', 'categories', 'locations'));
     }
 
     // Tampilkan form untuk menambah item barang habis pakai baru

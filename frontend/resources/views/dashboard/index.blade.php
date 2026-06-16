@@ -28,6 +28,31 @@
                 </div>
             </div>
 
+            @if(in_array($user['role'] ?? '', ['kepala_lab', 'staf_lab']) && isset($stats['lowStockItems']) && count($stats['lowStockItems']) > 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-warning alert-dismissible text-white fade show" role="alert">
+                        <span class="alert-icon align-middle">
+                            <i class="material-icons text-md">warning</i>
+                        </span>
+                        <span class="alert-text"><strong>Peringatan Stok!</strong> Ada {{ count($stats['lowStockItems']) }} barang habis pakai (BHP) yang stoknya mencapai batas minimum atau sudah habis:
+                            <ul class="mt-2 mb-0">
+                                @foreach($stats['lowStockItems'] as $item)
+                                    <li><strong>{{ $item['name'] }}</strong> (Lokasi: {{ $item['location'] ?? '-' }}) - Sisa Stok: <strong>{{ $item['currentStock'] }} {{ $item['unit'] }}</strong> (Minimal: {{ $item['minimumStock'] }})</li>
+                                @endforeach
+                            </ul>
+                            @if(($user['role'] ?? '') === 'kepala_lab')
+                                <a href="{{ route('kepala-lab.procurements.create') }}" class="btn btn-sm btn-white mt-3 mb-0">Buat Draf Pengadaan Baru</a>
+                            @endif
+                        </span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Stat Cards --}}
             <div class="row">
                 <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">

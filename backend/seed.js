@@ -19,6 +19,8 @@ const Asset = require('./src/models/Asset');
 const ConsumableItem = require('./src/models/ConsumableItem');
 const ProcurementDraft = require('./src/models/ProcurementDraft');
 const ProcurementItem = require('./src/models/ProcurementItem');
+const ActivityLog = require('./src/models/ActivityLog');
+const MaintenanceLog = require('./src/models/MaintenanceLog');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/lab_inventory';
 
@@ -35,6 +37,8 @@ async function seed() {
             ConsumableItem.deleteMany({}),
             ProcurementDraft.deleteMany({}),
             ProcurementItem.deleteMany({}),
+            ActivityLog.deleteMany({}),
+            MaintenanceLog.deleteMany({}),
         ]);
         console.log('Old data cleared.');
 
@@ -196,7 +200,6 @@ async function seed() {
 
         console.log(`${assets.length} assets created`);
 
-        // 4. Consumable Items (BHP) 
         const consumables = await ConsumableItem.insertMany([
             {
                 name: 'Kabel UTP Cat6 (1 box = 305m)',
@@ -204,7 +207,7 @@ async function seed() {
                 unit: 'box',
                 currentStock: 3,
                 minimumStock: 2,
-                location: 'Gudang Lab Jaringan',
+                location: 'Laboratorium Jaringan Komputer',
             },
             {
                 name: 'Konektor RJ-45',
@@ -212,7 +215,7 @@ async function seed() {
                 unit: 'pack (100 pcs)',
                 currentStock: 10,
                 minimumStock: 5,
-                location: 'Gudang Lab Jaringan',
+                location: 'Laboratorium Jaringan Komputer',
             },
             {
                 name: 'Toner HP 76A (CF276A)',
@@ -220,7 +223,7 @@ async function seed() {
                 unit: 'pcs',
                 currentStock: 1,
                 minimumStock: 2,
-                location: 'Gudang Lab Basis Data',
+                location: 'Laboratorium Basis Data',
                 notes: 'Stok menipis, perlu pengadaan segera',
             },
             {
@@ -229,7 +232,7 @@ async function seed() {
                 unit: 'tube',
                 currentStock: 8,
                 minimumStock: 3,
-                location: 'Gudang Lab Pemrograman',
+                location: 'Laboratorium Pemrograman',
             },
             {
                 name: 'Tisu Pembersih LCD',
@@ -237,7 +240,7 @@ async function seed() {
                 unit: 'pack (50 lembar)',
                 currentStock: 12,
                 minimumStock: 5,
-                location: 'Gudang Lab Multimedia',
+                location: 'Laboratorium Multimedia',
             },
         ]);
 
@@ -290,7 +293,97 @@ async function seed() {
             },
         ]);
 
-        console.log(`1 procurement draft + ${procItems.length} items created`);
+        console.log(`1 procurement draft (submitted) + ${procItems.length} items created`);
+
+        // Procurement Draft Locked (untuk menu Penerimaan Barang staf_admin)
+        const draftLocked = await ProcurementDraft.create({
+            title: 'Pengadaan Darurat Router Lab Jaringan',
+            year: 2026,
+            createdBy: kepalaLab._id,
+            status: 'locked',
+            submittedAt: new Date('2026-04-01'),
+            lockedAt: new Date('2026-04-05'),
+            reviewedBy: kaprodi._id,
+            notes: 'Router utama rusak, butuh penggantian segera',
+        });
+
+        const procItemsLocked = await ProcurementItem.insertMany([
+            {
+                draft: draftLocked._id,
+                itemType: 'asset',
+                name: 'Router MikroTik CCR1009',
+                quantity: 1,
+                unit: 'unit',
+                estimatedPrice: 7500000,
+                purchaseLink: 'https://www.tokopedia.com/mikrotik-ccr1009',
+                approvalStatus: 'approved',
+                receiveStatus: 'pending',
+                notes: 'Penting',
+            }
+        ]);
+        console.log(`1 procurement draft (locked) + ${procItemsLocked.length} items created`);
+
+        // Maintenance Logs (untuk menu Pemeliharaan staf_lab)
+        const maintenanceLogs = await MaintenanceLog.insertMany([
+            {
+                room: rooms[1]._id,
+                maintenanceType: 'rutin',
+                status: 'selesai',
+                description: 'Pembersihan dan pengecekan proyektor EB-X51',
+                assets: [{ asset: assets[3]._id, conditionBefore: 'baik', conditionAfter: 'rusak_ringan', notes: 'Masih bisa dipakai tapi redup' }],
+                consumablesUsed: [{ item: consumables[4]._id, quantityUsed: 2 }],
+                performedBy: stafLab._id,
+                date: new Date('2026-05-15')
+            }
+        ]);
+        console.log(`${maintenanceLogs.length} maintenance logs created`);
+
+        // 6. Contoh Activity Logs
+        const logs = await ActivityLog.insertMany([
+            {
+                user: adminUser._id,
+                action: 'LOGIN',
+                entityType: 'System',
+                description: 'Admin Utama berhasil login ke sistem',
+                createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+            },
+            {
+                user: stafAdmin._id,
+                action: 'UPDATE',
+                entityType: 'Asset',
+                entityId: assets[0]._id,
+                description: `Memperbarui label aset: ${assets[0].name}`,
+                metadata: { assetCode: assets[0].assetCode },
+                createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+            },
+            {
+                user: stafLab._id,
+                action: 'ADJUST_STOCK',
+                entityType: 'ConsumableItem',
+                entityId: consumables[0]._id,
+                description: `Menyesuaikan stok ${consumables[0].name} sejumlah -2. Stok sekarang: 3. Alasan: Digunakan untuk praktikum`,
+                metadata: { oldStock: 5, newStock: 3, reason: 'Digunakan untuk praktikum' },
+                createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+            },
+            {
+                user: kepalaLab._id,
+                action: 'CREATE',
+                entityType: 'ProcurementDraft',
+                entityId: draft._id,
+                description: `Membuat draf pengadaan baru: ${draft.title} (${draft.year})`,
+                createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+            },
+            {
+                user: kaprodi._id,
+                action: 'REJECT',
+                entityType: 'ProcurementItem',
+                entityId: procItems[2]._id,
+                description: `Menolak pengadaan item ${procItems[2].name}`,
+                metadata: { rejectionReason: 'Stok masih cukup untuk semester ini' },
+                createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+            }
+        ]);
+        console.log(`${logs.length} activity logs created`);
         console.log('  Seeding selesai!');
         console.log('\nAkun login (password semua: password123):');
         console.log('  Admin        → admin@lab.ac.id');

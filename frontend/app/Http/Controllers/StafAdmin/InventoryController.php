@@ -63,17 +63,19 @@ class InventoryController extends Controller
         return back()->with('error', $response->json('message') ?? 'Gagal memperbarui jumlah penerimaan.');
     }
 
-    // Tampilkan semua aset inventaris laboratorium dengan filter penerimaan
-    public function assets()
+    public function assets(Request $request)
     {
-        $status = request('status'); // 'received' untuk sudah diterima, 'pending' untuk belum
-        $query = $status === 'received' ? '?received=true' : ($status === 'pending' ? '?received=false' : '');
-        
-        $response = $this->api->get("/api/staf-admin/assets{$query}");
-        $assets = $response->successful() ? $response->json('data') : [];
-        $received = $status;
+        $allResp = $this->api->get('/api/staf-admin/assets');
+        $allData = $allResp->successful() ? $allResp->json('data') : [];
+        $categories = collect($allData)->pluck('category')->filter()->unique()->values();
 
-        return view('staf_admin.assets.index', compact('assets', 'received'));
+        $response = $this->api->get('/api/staf-admin/assets', $request->query());
+        $assets = $response->successful() ? $response->json('data') : [];
+
+        $roomsResponse = $this->api->get('/api/global/rooms');
+        $rooms = $roomsResponse->successful() ? $roomsResponse->json('data') : [];
+
+        return view('staf_admin.assets.index', compact('assets', 'rooms', 'categories'));
     }
 
     // Tampilkan detail lengkap satu aset dengan informasi label, QR, dan tanggal penerimaan

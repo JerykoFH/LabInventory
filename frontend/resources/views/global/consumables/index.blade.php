@@ -71,14 +71,46 @@
                         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
                             <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3 d-flex justify-content-between align-items-center px-3">
                                 <h6 class="text-white text-capitalize ps-3 mb-0">Daftar Barang Habis Pakai</h6>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="input-group input-group-outline" style="max-width: 220px;">
-                                        <input type="text" id="searchBHP" class="form-control form-control-sm text-white" placeholder="Cari item..." style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white;">
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div class="card-body px-0 pb-2">
+                            <form method="GET" action="{{ route('global.consumables.index') }}" class="px-4 py-3 d-flex flex-wrap gap-3 align-items-end border-bottom">
+                                <div class="input-group input-group-static" style="width: 200px;">
+                                    <label>Pencarian</label>
+                                    <input type="text" name="search" class="form-control" placeholder="Cari nama item..." value="{{ request('search') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Kategori</label>
+                                    <select name="category" class="form-control">
+                                        <option value="">Semua Kategori</option>
+                                        @foreach($categories ?? [] as $cat)
+                                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Status Stok</label>
+                                    <select name="stockStatus" class="form-control">
+                                        <option value="">Semua Status</option>
+                                        <option value="aman" {{ request('stockStatus') == 'aman' ? 'selected' : '' }}>Aman</option>
+                                        <option value="menipis" {{ request('stockStatus') == 'menipis' ? 'selected' : '' }}>Menipis (Low)</option>
+                                        <option value="habis" {{ request('stockStatus') == 'habis' ? 'selected' : '' }}>Habis (Out of Stock)</option>
+                                    </select>
+                                </div>
+                                <div class="input-group input-group-static" style="width: 160px;">
+                                    <label>Lokasi / Ruangan</label>
+                                    <select name="location" class="form-control">
+                                        <option value="">Semua Lokasi</option>
+                                        @foreach($locations ?? [] as $loc)
+                                            <option value="{{ $loc }}" {{ request('location') == $loc ? 'selected' : '' }}>{{ $loc }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
+                                    <a href="{{ route('global.consumables.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
+                                </div>
+                            </form>
                             <div class="table-responsive p-0">
                                 <table class="table align-items-center mb-0">
                                     <thead>
@@ -169,15 +201,4 @@
         </div>
     </main>
 
-    @push('js')
-    <script>
-        document.getElementById('searchBHP').addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            document.querySelectorAll('.bhp-row').forEach(function(row) {
-                const name = row.querySelector('.bhp-name')?.textContent.toLowerCase() ?? '';
-                row.style.display = name.includes(query) ? '' : 'none';
-            });
-        });
-    </script>
-    @endpush
 </x-layout>
