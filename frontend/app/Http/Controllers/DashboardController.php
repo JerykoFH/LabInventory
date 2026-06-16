@@ -38,6 +38,7 @@ class DashboardController extends Controller
                 $stats['submittedDrafts'] = $data['submittedDrafts'] ?? 0;
                 $stats['totalUsers'] = $data['totalUsers'] ?? 0;
                 $stats['maintenanceNeeded'] = $data['maintenanceNeeded'] ?? 0;
+                $stats['lowStockItems'] = $data['lowStockItems'] ?? [];
             }
         } catch (\Exception $e) {
             // Dashboard tetap tampil walaupun API gagal
