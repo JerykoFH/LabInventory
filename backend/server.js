@@ -14,7 +14,9 @@ const dashboardRoutes  = require('./src/routes/dashboardRoutes');
 const globalRoutes     = require('./src/routes/globalRoutes');
 
 // Koneksi MongoDB
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 const app = express();
 
@@ -50,9 +52,11 @@ app.use((err, req, res, next) => {
     res.status(500).json({ success: false, message: 'Internal Server Error', error: err.message });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`LabInventory API running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`LabInventory API running on http://localhost:${PORT}`);
+    });
+}
 
 module.exports = app;
