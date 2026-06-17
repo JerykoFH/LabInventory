@@ -94,6 +94,7 @@
                                 </ul>
 
                                 <div class="mt-4 text-center" id="action-buttons">
+                                    <a href="#" id="btn-view-detail" class="btn bg-gradient-primary w-100 mb-2">Lihat Detail Lengkap</a>
                                     @if($rolePrefix === 'staf-admin')
                                         <a href="{{ route('staf-admin.assets.index') }}" class="btn btn-outline-info w-100">Lihat di Daftar Aset</a>
                                     @else
@@ -332,6 +333,11 @@
 
                     document.getElementById('res-condition').outerHTML = `<span id="res-condition">${getConditionBadge(asset.condition)}</span>`;
                     document.getElementById('res-status').outerHTML = `<span id="res-status">${getStatusBadge(asset.status)}</span>`;
+
+                    const detailBtn = document.getElementById('btn-view-detail');
+                    if (detailBtn) {
+                        detailBtn.href = `/global/assets/${asset._id}`;
+                    }
 
                     switchState('result');
                 } else {

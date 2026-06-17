@@ -24,6 +24,17 @@ class GlobalViewController extends Controller
         return view('global.assets.index', compact('assets', 'rooms', 'categories'));
     }
 
+    public function showAsset(string $id)
+    {
+        $response = $this->api->get("/api/global/assets/{$id}");
+        if (!$response->successful()) {
+            return redirect()->route('global.assets.index')->with('error', 'Aset tidak ditemukan.');
+        }
+        $asset = $response->json('data');
+
+        return view('global.assets.show', compact('asset'));
+    }
+
     public function consumables(Request $request)
     {
         $allResp = $this->api->get('/api/global/consumables');

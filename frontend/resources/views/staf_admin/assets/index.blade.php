@@ -354,7 +354,11 @@
                                                     </div>
                                                 </div>
 
-
+                                                @if($asset['assetCode'] ?? false)
+                                                    <button type="button" class="btn btn-link text-primary text-xs p-0 mb-0 me-2 btn-show-qr" data-code="{{ $asset['assetCode'] }}" data-name="{{ $asset['name'] }}" title="Tampilkan QR Code">
+                                                        <i class="material-icons text-sm">qr_code_scanner</i>
+                                                    </button>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty
@@ -373,8 +377,60 @@
                 </div>
             </div>
 
+            <!-- Modal QR -->
+            <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                    <div class="modal-content text-center">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title font-weight-normal" id="qrModalTitle">QR Code</h5>
+                            <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body pb-0">
+                            <div id="qrCodeContainer" class="d-inline-block p-2 bg-white border border-radius-lg"></div>
+                            <p class="text-sm font-weight-bold mt-2 mb-0" id="qrModalCode"></p>
+                        </div>
+                        <div class="modal-footer border-0 justify-content-center">
+                            <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
 
+    @push('js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-show-qr').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    const name = this.getAttribute('data-name');
+                    
+                    document.getElementById('qrModalTitle').innerText = name;
+                    document.getElementById('qrModalCode').innerText = code;
+                    
+                    const container = document.getElementById('qrCodeContainer');
+                    container.innerHTML = '';
+                    
+                    new QRCode(container, {
+                        text: code,
+                        width: 150,
+                        height: 150,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    
+                    const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+                    qrModal.show();
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layout>
