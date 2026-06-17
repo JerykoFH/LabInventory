@@ -13,11 +13,25 @@ const { logActivity } = require('../utils/logger');
 const getAllConsumables = async (req, res) => {
     try {
         let filter = {};
-        const { category, stockStatus, location, search } = req.query;
+        const { category, stockStatus, location, search, startDate, endDate } = req.query;
 
         if (category) filter.category = category;
         if (location) filter.location = location;
         if (search) filter.name = { $regex: search, $options: 'i' };
+        
+        if (startDate || endDate) {
+            filter.lastRestockDate = filter.lastRestockDate || {};
+            if (startDate) {
+                const sDate = new Date(startDate);
+                sDate.setHours(0, 0, 0, 0);
+                filter.lastRestockDate.$gte = sDate;
+            }
+            if (endDate) {
+                const eDate = new Date(endDate);
+                eDate.setHours(23, 59, 59, 999);
+                filter.lastRestockDate.$lte = eDate;
+            }
+        }
         
         if (stockStatus) {
             if (stockStatus === 'aman') {
@@ -89,6 +103,7 @@ const adjustStock = async (req, res) => {
 
         const oldStock = item.currentStock;
         item.currentStock = newStock;
+        item.lastRestockDate = new Date();
         await item.save();
         
         await logActivity(req, 'ADJUST_STOCK', 'ConsumableItem', item._id, `Menyesuaikan stok ${item.name} sejumlah ${adjustment}. Stok sekarang: ${newStock}. Alasan: ${reason || '-'}`, { oldStock, newStock, reason });

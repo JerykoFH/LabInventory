@@ -135,6 +135,14 @@
                                         <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Diganti</option>
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('global.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -150,6 +158,7 @@
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ruangan</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kondisi</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl. Diterima</th>
                                             <th class="text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
@@ -222,6 +231,15 @@
                                                     };
                                                 @endphp
                                                 <span class="badge badge-sm {{ $statusColor }}">{{ $statusLabel }}</span>
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                @if($asset['receivedDate'] ?? false)
+                                                    <span class="text-success text-xs font-weight-bold">
+                                                        {{ \Carbon\Carbon::parse($asset['receivedDate'])->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-gradient-warning text-xs">Belum</span>
+                                                @endif
                                             </td>
                                             <td class="align-middle">
                                                 @if($asset['assetCode'] ?? false)

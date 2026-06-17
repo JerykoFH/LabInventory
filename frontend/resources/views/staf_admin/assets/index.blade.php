@@ -158,6 +158,14 @@
                                         <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Sudah Diganti</option>
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('staf-admin.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -288,6 +296,17 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
+                                                                    <div class="input-group input-group-static my-3">
+                                                                        <label for="roomSelect{{ $asset['_id'] }}">Ruangan (Opsional)</label>
+                                                                        <select name="room" id="roomSelect{{ $asset['_id'] }}" class="form-control">
+                                                                            <option value="">-- Pilih Ruangan --</option>
+                                                                            @foreach($rooms ?? [] as $room)
+                                                                                <option value="{{ $room['_id'] }}" {{ ($asset['room']['_id'] ?? '') == $room['_id'] ? 'selected' : '' }}>
+                                                                                    {{ $room['name'] }} ({{ $room['code'] }})
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
                                                                     <div class="input-group input-group-outline my-3 {{ $asset['assetCode'] ?? false ? 'is-filled' : '' }}">
                                                                         <label class="form-label">Kode Aset <span class="text-danger">*</span></label>
                                                                         <input type="text" name="assetCode" class="form-control" maxlength="50"

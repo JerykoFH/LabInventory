@@ -26,7 +26,10 @@ class InventoryController extends Controller
         $response = $this->api->get("/api/staf-admin/procurements/{$id}");
         $draft = $response->successful() ? $response->json('data') : null;
 
-        return view('staf_admin.procurements.show', compact('draft'));
+        $roomsResponse = $this->api->get('/api/global/rooms');
+        $rooms = $roomsResponse->successful() ? $roomsResponse->json('data') : [];
+
+        return view('staf_admin.procurements.show', compact('draft', 'rooms'));
     }
 
     // Ubah status pengadaan dari locked menjadi in_progress (sedang diproses)
@@ -47,6 +50,7 @@ class InventoryController extends Controller
     {
         $validated = $request->validate([
             'receivedQuantity' => 'required|numeric|min:0',
+            'room'             => 'nullable|string',
         ]);
 
         $response = $this->api->patch("/api/staf-admin/procurements/{$id}/items/{$itemId}/receive", $validated);
@@ -94,6 +98,7 @@ class InventoryController extends Controller
             'assetCode'  => 'required|string|max:50',
             'labelPhoto' => 'nullable|string',
             'qrCode'     => 'nullable|string',
+            'room'       => 'nullable|string',
         ]);
 
         $response = $this->api->patch("/api/staf-admin/assets/{$id}/label", $validated);

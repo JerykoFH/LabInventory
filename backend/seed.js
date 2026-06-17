@@ -208,6 +208,7 @@ async function seed() {
                 currentStock: 3,
                 minimumStock: 2,
                 location: 'Laboratorium Jaringan Komputer',
+                lastRestockDate: new Date('2025-10-12'),
             },
             {
                 name: 'Konektor RJ-45',
@@ -216,6 +217,7 @@ async function seed() {
                 currentStock: 10,
                 minimumStock: 5,
                 location: 'Laboratorium Jaringan Komputer',
+                lastRestockDate: new Date('2025-11-05'),
             },
             {
                 name: 'Toner HP 76A (CF276A)',
@@ -225,6 +227,7 @@ async function seed() {
                 minimumStock: 2,
                 location: 'Laboratorium Basis Data',
                 notes: 'Stok menipis, perlu pengadaan segera',
+                lastRestockDate: new Date('2025-12-20'),
             },
             {
                 name: 'Thermal Paste Arctic MX-4',
@@ -233,6 +236,7 @@ async function seed() {
                 currentStock: 8,
                 minimumStock: 3,
                 location: 'Laboratorium Pemrograman',
+                lastRestockDate: new Date('2026-01-15'),
             },
             {
                 name: 'Tisu Pembersih LCD',
@@ -241,6 +245,7 @@ async function seed() {
                 currentStock: 12,
                 minimumStock: 5,
                 location: 'Laboratorium Multimedia',
+                lastRestockDate: new Date('2026-02-10'),
             },
         ]);
 
