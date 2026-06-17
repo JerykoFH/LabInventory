@@ -135,6 +135,14 @@
                                         <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Diganti</option>
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('global.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -150,6 +158,8 @@
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ruangan</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kondisi</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl. Diterima</th>
+                                            <th class="text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -222,10 +232,26 @@
                                                 @endphp
                                                 <span class="badge badge-sm {{ $statusColor }}">{{ $statusLabel }}</span>
                                             </td>
+                                            <td class="align-middle text-center">
+                                                @if($asset['receivedDate'] ?? false)
+                                                    <span class="text-success text-xs font-weight-bold">
+                                                        {{ \Carbon\Carbon::parse($asset['receivedDate'])->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-gradient-warning text-xs">Belum</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle">
+                                                @if($asset['assetCode'] ?? false)
+                                                    <button type="button" class="btn btn-link text-info text-xs p-0 mb-0 btn-show-qr" data-code="{{ $asset['assetCode'] }}" data-name="{{ $asset['name'] }}">
+                                                        <i class="material-icons text-sm">qr_code</i> Tampilkan QR
+                                                    </button>
+                                                @endif
+                                            </td>
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="6" class="text-center py-5">
+                                            <td colspan="7" class="text-center py-5">
                                                 <i class="material-icons text-secondary" style="font-size: 48px;">inventory_2</i>
                                                 <p class="text-secondary text-sm mb-0 mt-2">Belum ada aset inventaris.</p>
                                             </td>
@@ -239,8 +265,60 @@
                 </div>
             </div>
 
+            <!-- Modal QR -->
+            <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                    <div class="modal-content text-center">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title font-weight-normal" id="qrModalTitle">QR Code</h5>
+                            <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body pb-0">
+                            <div id="qrCodeContainer" class="d-inline-block p-2 bg-white border border-radius-lg"></div>
+                            <p class="text-sm font-weight-bold mt-2 mb-0" id="qrModalCode"></p>
+                        </div>
+                        <div class="modal-footer border-0 justify-content-center">
+                            <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
 
+    @push('js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-show-qr').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    const name = this.getAttribute('data-name');
+                    
+                    document.getElementById('qrModalTitle').innerText = name;
+                    document.getElementById('qrModalCode').innerText = code;
+                    
+                    const container = document.getElementById('qrCodeContainer');
+                    container.innerHTML = '';
+                    
+                    new QRCode(container, {
+                        text: code,
+                        width: 150,
+                        height: 150,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    
+                    const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+                    qrModal.show();
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layout>

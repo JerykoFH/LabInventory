@@ -107,6 +107,7 @@ Route::prefix('staf-lab')->name('staf-lab.')->middleware(['api.auth', 'role:staf
 // Global Views (semua role kecuali admin — read-only)
 Route::prefix('global')->name('global.')->middleware(['api.auth', 'role:kepala_lab,kaprodi,staf_admin,staf_lab'])->group(function () {
     Route::get('assets',          [GlobalViewController::class, 'assets'])->name('assets.index');
+    Route::get('assets/{id}',     [GlobalViewController::class, 'showAsset'])->name('assets.show');
     Route::get('consumables',     [GlobalViewController::class, 'consumables'])->name('consumables.index');
     Route::get('rooms',           [GlobalViewController::class, 'rooms'])->name('rooms.index');
     Route::get('rooms/{id}',      [GlobalViewController::class, 'roomAssets'])->name('rooms.show');

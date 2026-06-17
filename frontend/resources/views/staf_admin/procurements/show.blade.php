@@ -164,6 +164,17 @@
                                                                         <label class="form-label">Total Diterima</label>
                                                                         <input type="number" name="receivedQuantity" class="form-control" value="{{ $item['receivedQuantity'] ?? 0 }}" min="0" max="{{ $item['quantity'] }}" required>
                                                                     </div>
+                                                                    @if($item['itemType'] === 'asset')
+                                                                    <div class="input-group input-group-static my-3">
+                                                                        <label for="roomSelect{{ $item['_id'] }}">Lokasi Ruangan (Opsional)</label>
+                                                                        <select name="room" id="roomSelect{{ $item['_id'] }}" class="form-control">
+                                                                            <option value="">-- Pilih Ruangan Nanti --</option>
+                                                                            @foreach($rooms ?? [] as $room)
+                                                                                <option value="{{ $room['_id'] }}">{{ $room['name'] }} ({{ $room['code'] }})</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                    @endif
                                                                     <p class="text-xs text-secondary mb-0">Pesanan: {{ $item['quantity'] }} {{ $item['unit'] ?? '' }}</p>
                                                                 </div>
                                                                 <div class="modal-footer">

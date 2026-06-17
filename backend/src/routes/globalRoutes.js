@@ -3,7 +3,7 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Controller imports — reuse existing read-only functions
-const { getAllAssets } = require('../controllers/inventoryController');
+const { getAllAssets, getAssetById } = require('../controllers/inventoryController');
 const { getAllConsumables, getAllRooms, getAssetsByRoom } = require('../controllers/labController');
 
 // Semua role boleh akses kecuali admin
@@ -11,6 +11,7 @@ router.use(protect, authorize('kepala_lab', 'kaprodi', 'staf_admin', 'staf_lab')
 
 // Inventaris (read-only)
 router.get('/assets', getAllAssets);
+router.get('/assets/:id', getAssetById);
 
 // BHP (read-only)
 router.get('/consumables', getAllConsumables);

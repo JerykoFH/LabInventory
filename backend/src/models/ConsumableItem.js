@@ -34,6 +34,9 @@ const consumableItemSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    lastRestockDate: {
+        type: Date,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('ConsumableItem', consumableItemSchema);

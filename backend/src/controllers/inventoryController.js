@@ -1,4 +1,5 @@
 const Asset = require('../models/Asset');
+const ConsumableItem = require('../models/ConsumableItem');
 const ProcurementDraft = require('../models/ProcurementDraft');
 const ProcurementItem = require('../models/ProcurementItem');
 const { logActivity } = require('../utils/logger');
@@ -46,13 +47,27 @@ const getLockedDraftDetail = async (req, res) => {
 const getAllAssets = async (req, res) => {
     try {
         let filter = {};
-        const { received, category, condition, status, room, search } = req.query;
+        const { received, category, condition, status, room, search, startDate, endDate } = req.query;
         
         // Filter berdasarkan status penerimaan
         if (received === 'true') {
             filter.receivedDate = { $ne: null };
         } else if (received === 'false') {
             filter.receivedDate = null;
+        }
+
+        if (startDate || endDate) {
+            filter.receivedDate = filter.receivedDate || {};
+            if (startDate) {
+                const sDate = new Date(startDate);
+                sDate.setHours(0, 0, 0, 0);
+                filter.receivedDate.$gte = sDate;
+            }
+            if (endDate) {
+                const eDate = new Date(endDate);
+                eDate.setHours(23, 59, 59, 999);
+                filter.receivedDate.$lte = eDate;
+            }
         }
 
         if (category) filter.category = category;
@@ -99,15 +114,22 @@ const getAssetById = async (req, res) => {
  */
 const updateAssetLabel = async (req, res) => {
     try {
-        const { assetCode, labelPhoto, qrCode } = req.body;
+        const { assetCode, labelPhoto, qrCode, room } = req.body;
+        
+        const updateData = { assetCode, labelPhoto, qrCode };
+        
+        if (room !== undefined) {
+            updateData.room = room || null;
+        }
+
         const asset = await Asset.findByIdAndUpdate(
             req.params.id,
-            { assetCode, labelPhoto, qrCode },
+            updateData,
             { new: true, runValidators: true }
         );
         if (!asset) return res.status(404).json({ success: false, message: 'Asset not found' });
         
-        await logActivity(req, 'UPDATE', 'Asset', asset._id, `Memperbarui label aset: ${asset.name}`, { assetCode, qrCode });
+        await logActivity(req, 'UPDATE', 'Asset', asset._id, `Memperbarui label aset: ${asset.name}`, { assetCode: updateData.assetCode, qrCode: updateData.qrCode });
         
         res.json({ success: true, data: asset });
     } catch (error) {
@@ -230,7 +252,7 @@ const setProcurementProgress = async (req, res) => {
 
 const receiveProcurementItem = async (req, res) => {
     try {
-        const { receivedQuantity } = req.body;
+        const { receivedQuantity, room } = req.body;
         if (receivedQuantity === undefined || receivedQuantity < 0) {
             return res.status(400).json({ success: false, message: 'Invalid received quantity' });
         }
@@ -249,8 +271,64 @@ const receiveProcurementItem = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Received quantity cannot exceed ordered quantity' });
         }
 
+        const previousReceivedQuantity = item.receivedQuantity || 0;
+        const newlyReceived = receivedQuantity - previousReceivedQuantity;
+
         item.receivedQuantity = receivedQuantity;
         await item.save();
+
+        if (newlyReceived > 0) {
+            if (item.itemType === 'asset') {
+                let roomObj = null;
+                let prefix = 'INV-IT';
+                if (room) {
+                    const Room = require('../models/Room');
+                    roomObj = await Room.findById(room);
+                    if (roomObj) prefix = `INV-${roomObj.code}`;
+                }
+
+                const assetsToCreate = [];
+                for (let i = 0; i < newlyReceived; i++) {
+                    const uniqueId = Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                    const generatedCode = `${prefix}-${uniqueId}`;
+                    
+                    assetsToCreate.push({
+                        name: item.name,
+                        category: 'Aset Baru',
+                        assetCode: generatedCode,
+                        qrCode: generatedCode,
+                        room: room || null,
+                        condition: 'baik',
+                        status: 'aktif',
+                        purchaseDate: draft.lockedAt || new Date(),
+                        purchasePrice: item.estimatedPrice,
+                        receivedDate: new Date(),
+                        procurementItem: item._id,
+                        replacedAsset: item.replacedAsset
+                    });
+                }
+                if (assetsToCreate.length > 0) {
+                    await Asset.insertMany(assetsToCreate);
+                }
+            } else if (item.itemType === 'consumable') {
+                const existingConsumable = await ConsumableItem.findOne({ name: item.name });
+                if (existingConsumable) {
+                    existingConsumable.currentStock += newlyReceived;
+                    existingConsumable.lastRestockDate = new Date();
+                    await existingConsumable.save();
+                } else {
+                    await ConsumableItem.create({
+                        name: item.name,
+                        category: 'BHP Baru',
+                        unit: item.unit || 'unit',
+                        currentStock: newlyReceived,
+                        minimumStock: 5,
+                        location: 'Gudang',
+                        lastRestockDate: new Date()
+                    });
+                }
+            }
+        }
 
         const allItems = await ProcurementItem.find({ draft: draft._id, approvalStatus: 'approved' });
         let allReceived = true;

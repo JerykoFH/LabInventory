@@ -106,6 +106,14 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Restok (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Restok (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('global.consumables.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -120,6 +128,7 @@
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stok Saat Ini</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min. Stok</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ruangan</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl Terakhir Restok</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -178,6 +187,15 @@
                                                     </a>
                                                 @else
                                                     <span class="text-secondary text-xs">{{ $item['location'] ?? '-' }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle text-center">
+                                                @if($item['lastRestockDate'] ?? false)
+                                                    <span class="text-success text-xs font-weight-bold">
+                                                        {{ \Carbon\Carbon::parse($item['lastRestockDate'])->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-secondary text-xs">-</span>
                                                 @endif
                                             </td>
                                         </tr>

@@ -126,6 +126,14 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Restok (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Restok (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('staf-lab.consumables.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -140,6 +148,7 @@
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Stok Saat Ini</th>
                                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min. Stok</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ruangan</th>
+                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl Terakhir Restok</th>
                                             <th class="text-center text-secondary opacity-7">Aksi</th>
                                         </tr>
                                     </thead>
@@ -202,6 +211,15 @@
                                                 @endif
                                             </td>
                                             <td class="align-middle text-center">
+                                                @if($item['lastRestockDate'] ?? false)
+                                                    <span class="text-success text-xs font-weight-bold">
+                                                        {{ \Carbon\Carbon::parse($item['lastRestockDate'])->format('d M Y') }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-secondary text-xs">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle text-center">
                                                 <button type="button"
                                                     class="btn btn-link text-info text-xs p-0 mb-0"
                                                     title="Sesuaikan Stok"
@@ -245,7 +263,7 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="6" class="text-center py-5">
+                                            <td colspan="7" class="text-center py-5">
                                                 <i class="material-icons text-secondary" style="font-size: 48px;">science</i>
                                                 <p class="text-secondary text-sm mb-0 mt-2">Belum ada item BHP.</p>
                                             </td>

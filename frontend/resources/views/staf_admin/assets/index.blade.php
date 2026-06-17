@@ -158,6 +158,14 @@
                                         <option value="diganti" {{ request('status') == 'diganti' ? 'selected' : '' }}>Sudah Diganti</option>
                                     </select>
                                 </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Mulai)</label>
+                                    <input type="date" name="startDate" class="form-control" value="{{ request('startDate') }}">
+                                </div>
+                                <div class="input-group input-group-static" style="width: 150px;">
+                                    <label>Tgl Terima (Akhir)</label>
+                                    <input type="date" name="endDate" class="form-control" value="{{ request('endDate') }}">
+                                </div>
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn bg-gradient-primary mb-0">Filter</button>
                                     <a href="{{ route('staf-admin.assets.index') }}" class="btn btn-outline-secondary mb-0">Reset</a>
@@ -288,6 +296,17 @@
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <p class="text-sm text-secondary mb-3">Aset: <strong>{{ $asset['name'] }}</strong></p>
+                                                                    <div class="input-group input-group-static my-3">
+                                                                        <label for="roomSelect{{ $asset['_id'] }}">Ruangan (Opsional)</label>
+                                                                        <select name="room" id="roomSelect{{ $asset['_id'] }}" class="form-control">
+                                                                            <option value="">-- Pilih Ruangan --</option>
+                                                                            @foreach($rooms ?? [] as $room)
+                                                                                <option value="{{ $room['_id'] }}" {{ ($asset['room']['_id'] ?? '') == $room['_id'] ? 'selected' : '' }}>
+                                                                                    {{ $room['name'] }} ({{ $room['code'] }})
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
                                                                     <div class="input-group input-group-outline my-3 {{ $asset['assetCode'] ?? false ? 'is-filled' : '' }}">
                                                                         <label class="form-label">Kode Aset <span class="text-danger">*</span></label>
                                                                         <input type="text" name="assetCode" class="form-control" maxlength="50"
@@ -354,7 +373,11 @@
                                                     </div>
                                                 </div>
 
-
+                                                @if($asset['assetCode'] ?? false)
+                                                    <button type="button" class="btn btn-link text-primary text-xs p-0 mb-0 me-2 btn-show-qr" data-code="{{ $asset['assetCode'] }}" data-name="{{ $asset['name'] }}" title="Tampilkan QR Code">
+                                                        <i class="material-icons text-sm">qr_code_scanner</i>
+                                                    </button>
+                                                @endif
                                             </td>
                                         </tr>
                                         @empty
@@ -373,8 +396,60 @@
                 </div>
             </div>
 
+            <!-- Modal QR -->
+            <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                    <div class="modal-content text-center">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title font-weight-normal" id="qrModalTitle">QR Code</h5>
+                            <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body pb-0">
+                            <div id="qrCodeContainer" class="d-inline-block p-2 bg-white border border-radius-lg"></div>
+                            <p class="text-sm font-weight-bold mt-2 mb-0" id="qrModalCode"></p>
+                        </div>
+                        <div class="modal-footer border-0 justify-content-center">
+                            <button type="button" class="btn bg-gradient-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <x-footers.auth></x-footers.auth>
         </div>
     </main>
 
+    @push('js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-show-qr').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const code = this.getAttribute('data-code');
+                    const name = this.getAttribute('data-name');
+                    
+                    document.getElementById('qrModalTitle').innerText = name;
+                    document.getElementById('qrModalCode').innerText = code;
+                    
+                    const container = document.getElementById('qrCodeContainer');
+                    container.innerHTML = '';
+                    
+                    new QRCode(container, {
+                        text: code,
+                        width: 150,
+                        height: 150,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                    
+                    const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+                    qrModal.show();
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-layout>
