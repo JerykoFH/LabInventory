@@ -15,18 +15,19 @@ const {
     updateAssetCondition
 } = require('../controllers/inventoryController');
 
-router.use(protect, authorize('staf_admin'));
+router.use(protect);
 
-router.get('/procurements', getLockedDrafts);
-router.get('/procurements/:id', getLockedDraftDetail);
-router.patch('/procurements/:id/progress', setProcurementProgress);
-router.patch('/procurements/:id/items/:itemId/receive', receiveProcurementItem);
-router.get('/assets', getAllAssets);
-router.get('/assets/scan/:code', getAssetByCode);
-router.get('/assets/:id', getAssetById);
-router.post('/assets', createAsset);
-router.patch('/assets/:id/label', updateAssetLabel);
-router.patch('/assets/:id/receive', setReceivedDate);
-router.patch('/assets/:id/condition', updateAssetCondition);
+router.get('/procurements', authorize('staf_admin'), getLockedDrafts);
+router.get('/procurements/:id', authorize('staf_admin'), getLockedDraftDetail);
+router.patch('/procurements/:id/progress', authorize('staf_admin'), setProcurementProgress);
+router.patch('/procurements/:id/items/:itemId/receive', authorize('staf_admin'), receiveProcurementItem);
+
+router.get('/assets', authorize('staf_admin', 'staf_lab'), getAllAssets);
+router.get('/assets/scan/:code', authorize('staf_admin', 'staf_lab'), getAssetByCode);
+router.get('/assets/:id', authorize('staf_admin', 'staf_lab'), getAssetById);
+router.post('/assets', authorize('staf_admin', 'staf_lab'), createAsset);
+router.patch('/assets/:id/label', authorize('staf_admin', 'staf_lab'), updateAssetLabel);
+router.patch('/assets/:id/receive', authorize('staf_admin', 'staf_lab'), setReceivedDate);
+router.patch('/assets/:id/condition', authorize('staf_admin', 'staf_lab'), updateAssetCondition);
 
 module.exports = router;

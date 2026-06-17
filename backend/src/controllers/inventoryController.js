@@ -13,8 +13,19 @@ const getLockedDrafts = async (req, res) => {
         const drafts = await ProcurementDraft.find({ status: { $in: ['locked', 'in_progress'] } })
             .populate('createdBy', 'name email')
             .populate('reviewedBy', 'name email')
-            .sort({ lockedAt: -1 });
-        res.json({ success: true, count: drafts.length, data: drafts });
+            .sort({ lockedAt: -1 })
+            .lean();
+
+        const draftsWithItems = [];
+        for (let draft of drafts) {
+            const itemCount = await ProcurementItem.countDocuments({ draft: draft._id, approvalStatus: 'approved' });
+            if (itemCount > 0) {
+                draft.itemCount = itemCount;
+                draftsWithItems.push(draft);
+            }
+        }
+
+        res.json({ success: true, count: draftsWithItems.length, data: draftsWithItems });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
